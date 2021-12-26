@@ -1,0 +1,11 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server serving API endpoints for the IMSE course project.",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.2",
+    "joi": "^17.5.0",
+    "nodemon": "^2.0.15"
+  }
+}
