@@ -7,6 +7,10 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "engines": {
+    "node": "16.1.x",
+    "yarn": ">=1.21.x"
+  },
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
