@@ -59,7 +59,7 @@ const gameSchema = Joi.object({
 // Set headers for each request
 app.use((req, res, next) => {
   // Allow requests from client
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+  res.setHeader('Access-Control-Allow-Origin', '*')
 
   next()
 })
