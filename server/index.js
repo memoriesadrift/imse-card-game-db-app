@@ -3,7 +3,7 @@ const express = require('express')
 const Joi = require('joi')
 const app = express()
 
-const port = process.env.PORT || 3001
+const port = 8080
 
 app.use(express.json()) // enable JSON parsing in request body, for POST requests
 
@@ -59,7 +59,7 @@ const gameSchema = Joi.object({
 // Set headers for each request
 app.use((req, res, next) => {
   // Allow requests from client
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+  res.setHeader('Access-Control-Allow-Origin', '*')
 
   next()
 })
