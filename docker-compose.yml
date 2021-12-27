@@ -45,4 +45,8 @@ services:
 networks:
   server-nginx:
   app-nginx:
+<<<<<<< HEAD
   sql-server:
+=======
+
+>>>>>>> 1fde7ec (split the app and server network)
