@@ -5,21 +5,22 @@ services:
     container_name: ise-server
     restart: always
     networks:
-      internal:
+      server-nginx:
 
   app:
     build: ./app
     container_name: ise-app
     restart: always
     networks:
-      internal:
+      app-nginx:
 
   nginx:
     build: ./nginx
     container_name: ise-nginx
     restart: always
     networks:
-      internal:
+      server-nginx:
+      app-nginx:
     ports:
       - target: 80
         published: 80
@@ -29,5 +30,6 @@ services:
         protocol: tcp
 
 networks:
-  internal:
+  server-nginx:
+  app-nginx:
 
