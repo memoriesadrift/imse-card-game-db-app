@@ -4,7 +4,8 @@ import { CardGame, Review } from "../types"
 export const useGetCardGames = () => {
     return useQuery('card-games', async (): Promise<Array<CardGame>> => {
         // TODO: Extract to environment variable
-        const uri = 'http://localhost:3001/api/games'
+        
+	const uri = 'http://localhost:8080/api/games'
         const response = await fetch(uri).then((res) => res.json())
 
         return response.map((rawRes: any) => {

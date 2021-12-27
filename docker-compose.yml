@@ -1,0 +1,33 @@
+services:
+
+  server:
+    build: ./server
+    container_name: ise-server
+    restart: always
+    networks:
+      internal:
+
+  app:
+    build: ./app
+    container_name: ise-app
+    restart: always
+    networks:
+      internal:
+
+  nginx:
+    build: ./nginx
+    container_name: ise-nginx
+    restart: always
+    networks:
+      internal:
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+      - target: 8080
+        published: 8080
+        protocol: tcp
+
+networks:
+  internal:
+

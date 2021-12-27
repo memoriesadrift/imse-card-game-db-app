@@ -3,7 +3,7 @@ const express = require('express')
 const Joi = require('joi')
 const app = express()
 
-const port = process.env.PORT || 3001
+const port = 8080
 
 app.use(express.json()) // enable JSON parsing in request body, for POST requests
 
