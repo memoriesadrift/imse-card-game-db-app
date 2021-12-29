@@ -2,6 +2,7 @@
 const express = require('express')
 const Joi = require('joi')
 const app = express()
+const mysql = require('mysql2')
 
 const port = 8080
 
@@ -128,5 +129,26 @@ app.get('/api/games/:id', (req, res) => {
 
   res.status(game ? 200 : 404).send(game || 'The game with the given ID could not be found.')
 })
+
+// test if db works
+app.get('/db', (req, res) => {
+  
+  var con = mysql.createConnection({
+    host: "ise-mysql",
+    user: "ise-editor",
+    password: "ise-password"
+  });
+
+  con.connect(function(err) {
+    if (err) { 
+      res.send("DB connection failed");
+      console.log(err);
+    }
+    else
+      res.send("Connected!");
+  });
+
+})
+
 
 app.listen(port, () => console.log(`Listening on port ${port}...`))
