@@ -1,4 +1,16 @@
 services:
+  
+  mysql:
+    image: mysql:8.0
+    container_name: ise-mysql
+    restart: always
+    networks:
+      sql-server:
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: card-game
+      MYSQL_USER: ise-editor
+      MYSQL_PASSWORD: ise-password
 
   server:
     build: ./server
@@ -6,6 +18,7 @@ services:
     restart: always
     networks:
       server-nginx:
+      sql-server:
 
   app:
     build: ./app
@@ -32,4 +45,4 @@ services:
 networks:
   server-nginx:
   app-nginx:
-
+  sql-server:
