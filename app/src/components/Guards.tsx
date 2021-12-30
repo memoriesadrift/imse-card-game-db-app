@@ -1,4 +1,3 @@
-import { Alert, CircularProgress } from '@mui/material'
 import React from 'react'
 
 type QueryGuardProps<T> = {
@@ -17,11 +16,16 @@ type QueryGuardProps<T> = {
   }: QueryGuardProps<T>) {
   
     if (error) {
-      return <Alert severity="error">An error occured while fetching data.</Alert>
+      return (
+        <div className="uk-alert-danger uk-card uk-card-body 
+        uk-margin-medium-left uk-margin-medium-right" uk-alert>
+            <p>An error occured while fetching data...</p>
+        </div>            
+        )
     }
     if (isDefined(data)) {
       return typeof children === 'function' ? children(data) : children
     }
-    return (isLoading) ? <CircularProgress size={26} /> : null
+    return (isLoading) ? <p>Loading...</p> : null
   }
   

@@ -1,11 +1,20 @@
-import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import UIKit from '../src/components/uikit'
+import '../../node_modules/uikit/dist/css/uikit.css'
+import '../styles/globals.css'
 
 // This is used by Next to render pages
 function MyApp({ Component, pageProps }: AppProps) {
   const queryClient = new QueryClient()
-  return <QueryClientProvider client={queryClient}><Component {...pageProps} /></QueryClientProvider>
+  
+  return (
+      <UIKit>
+        <QueryClientProvider client={queryClient}>
+          <Component {...pageProps} />
+        </QueryClientProvider>
+      </UIKit>
+  )
 }
 
 export default MyApp
