@@ -13,6 +13,7 @@
     ]
   },
   "scripts": {
+    "dev-local": "yarn workspace app dev-local",
     "dev": "concurrently 'yarn workspace app dev' 'yarn workspace server dev'"
   },
   "dependencies": {

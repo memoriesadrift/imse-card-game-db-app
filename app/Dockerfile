@@ -7,6 +7,7 @@ COPY yarn.lock ./
 
 RUN yarn install
 
+# TODO: optimise for production
 # uncomment for production
 # RUN yarn build
 
