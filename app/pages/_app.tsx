@@ -1,6 +1,6 @@
 import type { AppProps } from 'next/app'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import UIKit from '../src/components/uikit'
+import UIKit from '../src/components/Uikit'
 import '../../node_modules/uikit/dist/css/uikit.css'
 import '../styles/globals.css'
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import {useClientRouter} from 'use-client-router'
-import Navbar from '../../src/components/navbar'
+import Navbar from '../../src/components/Navbar'
 
 export default function Game() {
     const router = useClientRouter()
