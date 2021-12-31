@@ -8,12 +8,13 @@ type CardGameListCardProps = {
 
 export default function CardGameListCard({game}: CardGameListCardProps) {
     return (
-        <div className="uk-card uk-card-default uk-width-1-2@m uk-align-center">
+        <div className="uk-card uk-card-default uk-width-1-2@m uk-align-center uk-margin-medium-bottom">
             <div className="uk-card-header">
                 <div className="uk-grid-small uk-flex-middle" uk-grid>
                     <div className="uk-width-expand">
                         <h3 className="uk-card-title uk-margin-remove-bottom">{game.name}</h3>
-                        <p className="uk-text-meta uk-margin-remove-top">{game.verification ? 'Verified' : 'Unverified'}</p>
+                        <p className="uk-text-emphasis uk-text-meta uk-margin-remove-bottom uk-margin-remove-top">{game.verification ? 'Verified' : 'Unverified'}</p>
+                        <Link href={game.cardType.wikipediaLink}><a className="uk-text-meta uk-margin-remove-top">{`Uses ${game.cardType.name}`}</a></Link>
                     </div>
                 </div>
             </div>

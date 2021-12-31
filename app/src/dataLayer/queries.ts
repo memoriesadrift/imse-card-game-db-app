@@ -1,5 +1,5 @@
 import { useQuery } from "react-query"
-import { CardGame, Review } from "../types"
+import { CardGame, CardType, Review, URL, Verification } from "../types"
 
 export const useGetCardGames = () => {
     return useQuery('card-games', async (): Promise<Array<CardGame>> => {
@@ -15,7 +15,15 @@ export const useGetCardGames = () => {
                 description: rawRes.description,
             }
 
-            const reviews = {
+            const cardType: {cardType: CardType} = {
+                cardType: {
+                    name: rawRes.cardType.name,
+                    id: rawRes.cardType.id,
+                    wikipediaLink: rawRes.cardType.wikipediaLink as URL,
+                }
+            }
+
+            const reviews: {reviews: Array<Review>} = {
                 reviews: rawRes.reviews.map((rawReview: any): Review => {
                     return {
                         id: parseInt(rawReview.id),
@@ -27,7 +35,7 @@ export const useGetCardGames = () => {
                 }),
             }
 
-            const verification = rawRes.verification ? {
+            const verification: {verification?: Verification} = rawRes.verification ? {
                 verification: {
                     comment: rawRes.verification.comment,
                     timestamp: parseInt(rawRes.verification.timestamp),
@@ -35,7 +43,7 @@ export const useGetCardGames = () => {
                 },
             } : {}
 
-            return {...baseObj, ...reviews, ...verification}
+            return {...baseObj, ...cardType, ...reviews, ...verification}
         })
     })
 }
