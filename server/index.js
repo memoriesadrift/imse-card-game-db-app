@@ -13,6 +13,11 @@ let testGames = [
     id: 1,
     name: 'Joker',
     description: 'A fun party game.',
+    cardType: {
+      id: 1,
+      name: 'French-suited playing cards',
+      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards',
+    },
     reviews: [
       {
         id: 1,
@@ -27,6 +32,11 @@ let testGames = [
     id: 2,
     name: 'Poker',
     description: 'A casino favourite.',
+    cardType: {
+      id: 1,
+      name: 'French-suited playing cards',
+      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards',
+    },
     verification: {
       comment: 'Classic. Approved.',
       timestamp: 1387430022,
@@ -48,6 +58,17 @@ let testGames = [
         leftByUser: 'seth9u52',
       },
     ],
+  },
+  {
+    id: 3,
+    name: 'Texas Hold \'em Poker',
+    description: 'A spin on a casion classic.',
+    cardType: {
+      id: 1,
+      name: 'French-suited playing cards',
+      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards',
+    },
+    reviews: [],
   },
 ]
 

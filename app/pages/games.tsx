@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import { QueryGuard } from '../src/components/Guards'
-import Navbar from '../src/components/navbar'
+import Navbar from '../src/components/Navbar'
+import CardGameListCard from '../src/components/visual/CardGameListCard'
 import { useGetCardGames } from '../src/dataLayer/queries'
 
 const Games: NextPage = () => {
@@ -15,7 +16,7 @@ const Games: NextPage = () => {
           <ul className='uk-list'>
             {gameList.map((game, idx) => (
               <li key={idx}>
-                {game.name}
+                <CardGameListCard game={game} />
               </li>
             ))}
           </ul>
