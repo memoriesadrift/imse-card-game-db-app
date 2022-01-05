@@ -157,7 +157,8 @@ app.get('/db', (req, res) => {
   var con = mysql.createConnection({
     host: "ise-mysql",
     user: "ise-editor",
-    password: "ise-password"
+    password: "ise-password",
+    database: "card-game"
   });
 
   con.connect(function(err) {
@@ -165,8 +166,12 @@ app.get('/db', (req, res) => {
       res.send("DB connection failed");
       console.log(err);
     }
-    else
-      res.send("Connected!");
+    else {
+      con.query("SHOW tables", function(err, tables) {
+        res.send(tables);
+        //res.send("Connected! <br>" + tables.toString());
+      });
+    }
   });
 
 })
