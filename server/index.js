@@ -2,11 +2,13 @@
 const express = require('express')
 const Joi = require('joi')
 const app = express()
-const mysql = require('mysql2')
+const database = require("./database/RDBMS/relationaldb.ts");
 
 const port = 8080
 
 app.use(express.json()) // enable JSON parsing in request body, for POST requests
+
+
 
 let testGames = [
   {
@@ -91,6 +93,12 @@ app.get('/api/strategy', (_req, res) => {
   res.send('none')
 })
 
+// generate db entries
+app.get('/api/populate', (_req, res) => {
+  database.populateDb();
+  res.send(":)");
+});
+
 // List games
 app.get('/api/games', (_req, res) => {
   res.send(testGames)
@@ -153,28 +161,11 @@ app.get('/api/games/:id', (req, res) => {
 
 // test if db works
 app.get('/db', (req, res) => {
-  
-  var con = mysql.createConnection({
-    host: "ise-mysql",
-    user: "ise-editor",
-    password: "ise-password",
-    database: "card-game"
-  });
-
-  con.connect(function(err) {
-    if (err) { 
-      res.send("DB connection failed");
-      console.log(err);
-    }
-    else {
-      con.query("SHOW tables", function(err, tables) {
-        res.send(tables);
-        //res.send("Connected! <br>" + tables.toString());
-      });
-    }
-  });
-
-})
-
+  if (database.isDbReady()) {
+    res.send("Connected!");
+  } else {
+    res.send("DB connection failed");
+  }
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}...`))

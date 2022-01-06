@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: ise-password
 
   mysql:
-    image: mysql:8.0
+    build: ./mysql
     container_name: ise-mysql
     restart: always
     networks:
