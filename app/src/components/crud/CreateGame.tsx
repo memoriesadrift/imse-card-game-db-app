@@ -1,6 +1,9 @@
 import React from 'react'
+import { useAddCardGame } from '../../dataLayer/mutations'
 
 export default function CreateGame() {
+    const addGame = useAddCardGame()
+
     return (
         <div className='uk-card uk-card-default uk-width-1-2@m uk-align-center'>
             <div className='uk-card-body'>
@@ -28,15 +31,8 @@ export default function CreateGame() {
                             <textarea className="uk-textarea" rows={5} placeholder="Describe your card game..."/>
                         </div>
                     </div>
-
-                    <div className="uk-margin">
-                        <div className="uk-form-label">Radio</div>
-                        <div className="uk-form-controls uk-form-controls-text">
-                            <label><input className="uk-radio" type="radio" name="radio1"/> Option 01</label><br/>
-                            <label><input className="uk-radio" type="radio" name="radio1"/> Option 02</label>
-                        </div>
-                    </div>
                 </form>
+                <button className="uk-button uk-button-danger uk-button-large" onClick={async () => {/*await addGame.mutateAsync(game)*/}}>Delete</button>  
             </div>
         </div>
     )

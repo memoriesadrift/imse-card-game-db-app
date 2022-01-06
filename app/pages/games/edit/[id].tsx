@@ -1,13 +1,18 @@
 import { assert } from 'console'
-import React from 'react'
+import React, { useState } from 'react'
 import {useClientRouter} from 'use-client-router'
 import { QueryGuard } from '../../../src/components/Guards'
 import Navbar from '../../../src/components/Navbar'
 import { useGetCardGame } from '../../../src/dataLayer'
+import { onChangeWrapper } from '../../../src/utils'
 
 export default function EditGame() {
     const router = useClientRouter()
     const {id} = router.query
+
+    const [name, setName] = useState('')
+    const [description, setDescription] = useState('')
+
 
     const onSubmit = () => {}
     
@@ -27,14 +32,14 @@ export default function EditGame() {
                                 <div className="uk-margin">
                                     <label className="uk-form-label" htmlFor="form-stacked-text">Name</label>
                                     <div className="uk-form-controls">
-                                        <input className="uk-input" id="form-stacked-text" type="text" name="customerName" placeholder="Loading..." onChange={(event) => null} ></input>
+                                        <input className="uk-input" id="form-stacked-text" type="text" name="customerName" placeholder="Loading..." onChange={(event) => onChangeWrapper(event, setName)} ></input>
                                     </div>
                                 </div>
 
                                 <div className="uk-margin">
                                     <label className="uk-form-label" htmlFor="form-stacked-text">Description</label>
                                     <div className="uk-form-controls">
-                                        <textarea className="uk-input" id="form-stacked-text" name="customerName" placeholder="Loading..." onChange={(event) => null} ></textarea>
+                                        <textarea className="uk-input" id="form-stacked-text" name="customerName" placeholder="Loading..." onChange={(event) => onChangeWrapper(event, setDescription)} ></textarea>
                                     </div>
                                 </div>
 

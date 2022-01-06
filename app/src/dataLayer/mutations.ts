@@ -10,8 +10,26 @@ export const usePopulateDatabase = () => {
     })
 }
 
-export const useAddGame = () => {
-    return useMutation('addGame', async (cardGame: CardGame) => {
+export const useMigrateDatabase = () => {
+    return useMutation('migrateDatabase', async () => {
        fetch(`${baseUri}/migrate`)
+    })
+}
+
+export const useAddCardGame = () => {
+    return useMutation('addCardGame', async (game: CardGame) => {
+        const response = await fetch(
+            `${baseUri}/games`,
+            {
+                method: 'POST',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(game)
+            }
+        )
+        return response.json()
     })
 }
