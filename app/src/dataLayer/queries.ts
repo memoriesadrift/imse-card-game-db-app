@@ -12,9 +12,10 @@ export const useGetCardGames = () => {
     })
 }
 
-export const useGetCardGame = (id: number) => {
-    return useQuery('card-game', async (): Promise<CardGame> => {
-        const uri = `${baseUri}/game/${id}`
+export const useGetCardGame = (id: number | undefined) => {
+    return useQuery('card-game', async (): Promise<CardGame | undefined> => {
+        if (id === undefined) return undefined
+        const uri = `${baseUri}/games/${id}`
         const response = await fetch(uri).then((res) => res.json())
 
         return parseCardGame(response)
