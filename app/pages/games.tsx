@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { QueryGuard } from '../src/components/Guards'
 import Navbar from '../src/components/Navbar'
 import CardGameListCard from '../src/components/visual/CardGameListCard'
-import { useGetCardGames } from '../src/dataLayer/queries'
+import { useGetCardGames } from '../src/dataLayer'
 
 const Games: NextPage = () => {
   const gameListQuery = useGetCardGames()
