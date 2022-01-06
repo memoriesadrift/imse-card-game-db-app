@@ -6,7 +6,7 @@ class UIKit extends Component {
   componentDidMount = () => {
     if (typeof window !== "undefined") {
       const uikit = require("uikit");
-      const icons = require("../../../node_modules/uikit/dist/js/uikit-icons.js");
+      const icons = require("../../node_modules/uikit/dist/js/uikit-icons.js");
       uikit.use(icons);
       this.setState({ ready: true });
     }
