@@ -1,13 +1,14 @@
 import Link from 'next/link'
 import React from 'react'
 import { CardGame } from '../../types'
-import { game as gameLink } from '../../utils/links'
+import { reviewGame } from '../../utils/links'
+import GameReview from './GameReview'
 
 type CardGameListCardProps = {
     game: CardGame,
 }
 
-export default function CardGameListCard({game}: CardGameListCardProps) {
+export default function CardGameCard({game}: CardGameListCardProps) {
     return (
         <div className="uk-card uk-card-default uk-width-1-2@m uk-align-center uk-margin-medium-bottom">
             <div className="uk-card-header">
@@ -21,10 +22,17 @@ export default function CardGameListCard({game}: CardGameListCardProps) {
             </div>
             <div className="uk-card-body">
                 <p>{game.description}</p>
-                <p>{`${game.reviews.length || 'No'} review${game.reviews.length === 1 ? '' : 's'}`}</p>
+                <h4 className="uk-margin-remove-bottom">Reviews</h4>
+                <hr />
+                {game.reviews.map((review, idx) => (
+                    <>
+                        <GameReview key={idx} {...{review}} />
+                        <hr className='uk-divider-small' />
+                    </>
+                ))}
             </div>
             <div className="uk-card-footer">
-                <Link href={gameLink(game.id)}><a className="uk-button uk-button-text">Read Reviews</a></Link>
+                <Link href={reviewGame(game.id)}><a className="uk-button uk-button-text">Leave a Review</a></Link>
             </div>
         </div>
     )
