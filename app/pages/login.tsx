@@ -6,6 +6,7 @@ const Login: NextPage = () => {
     <>
       <Navbar />
       <h1 className="uk-heading-medium uk-text-center">Log In</h1>
+      <p>Not yet implemented!</p>
     </>
   )
 }
