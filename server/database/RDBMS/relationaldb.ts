@@ -1,30 +1,45 @@
-const mysql = require('mysql2');
-const fs = require('fs');
+import fs from 'fs';
+//const mysql = require('mysql2/promise');
+import mysql from 'mysql2/promise';
 
 // establish db connection
-const con = mysql.createConnection({
-  host: "ise-mysql",
-  user: "ise-editor",
-  password: "ise-password",
-  database: "card-game"
-});
 
-
-exports.isDbReady = function() {
-  let success;
-  con.connect(function(err) {
-    if (err) {     
-      success = false;
-      return false;
-    }
-    success = true;
-    return true;
-  });
-  
-  return success;
+const connect = async () => {
+  try {
+    const con = await mysql.createConnection({
+      host: "ise-mysql",
+      user: "ise-editor",
+      password: "ise-password",
+      database: "card-game"
+    });
+    return con;
+  } catch (e: unknown) {
+    console.log("oh istenem");
+    return undefined;
+  }
 }
 
-exports.populateDb = function() {
+export const isDbReady = async () => {
+  const con = await connect();
+  if (con == undefined) {
+    console.log("Failed to create connection to db");
+    return false;
+  }
+  
+  console.log("moment of truth");
+  try {
+    await con.connect();
+    console.log("connection successful");
+    return true;
+  } catch (e: unknown) {
+    console.log("connection to db failed");
+    return false;
+  }
+}
+
+export const populateDb = async () => {
+}
+/*
   // insert users
   let usernames = [];
 
@@ -37,7 +52,7 @@ exports.populateDb = function() {
     console.log(users[user]["username"]);
 
     // use the ? notation to escape the values. Prevents sql injection.
-    con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [users[user]["username"], users[user]["password"], users[user]["email"], users[user]["birthday"]]);
+    //con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [users[user]["username"], users[user]["password"], users[user]["email"], users[user]["birthday"]]);
   }
 
   // insert admins
@@ -53,7 +68,7 @@ exports.populateDb = function() {
     const promotedBy = Math.random() > 0.5 ? adminUsernames[Math.floor(Math.random() * adminUsernames.length)] : null;
     adminUsernames.push(username);
 
-    con.query('INSERT INTO Admin VALUES (?, ?, ?, ?)', [username, admins[admin]["realname"], admins[admin]["profiledescription"], promotedBy]);
+    //con.query('INSERT INTO Admin VALUES (?, ?, ?, ?)', [username, admins[admin]["realname"], admins[admin]["profiledescription"], promotedBy]);
   }
   
   // insert cardTypes
@@ -68,20 +83,26 @@ exports.populateDb = function() {
   const cardGamesData = fs.readFileSync('./data/cardGames.json', 'utf-8');
   const cardGames = JSON.parse(cardGamesData);
 
-  // assume MAX ID will be the highest current inserted => +1 = start ID of the inserted
   let minID;
-  con.query('SELECT MAX(ID) FROM CardGame', (err, res) => {
+  const processMaxID = (x) => minID = x;
+
+  // assume MAX ID will be the highest current inserted => +1 = start ID of the inserted
+  con.query('SELECT MAX(ID) FROM CardGame', async (err, res) => {
     if (err) {
       console.log(err);
-      return;
+      return -1;
     }
 
     if (res == null) {
-      minID = 1;
-      return;
+      //minID = 1;
+      return 1;
     }
-    minID = res + 1;
+    //minID = res + 1;
+    return res + 1
   });
+
+  console.log(minID);
+  console.log("aaaaaaaaaaaaaaaaaaaaaaaaa");
 
   let maxID = minID - 1;
   for (const cardGame in cardGames) {
@@ -115,5 +136,6 @@ exports.populateDb = function() {
     con.query('INSERT INTO VerifiedCardGame(ID, Description, VerifiedBy) VALUES (?, ?, ?)', [cardGameID, verifiedCardGames[verifiedCardGame]["description"], ])
   }
   */
-
+/*
 }
+*/

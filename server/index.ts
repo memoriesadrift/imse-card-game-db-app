@@ -1,12 +1,11 @@
 // TODO: Upgrade to TS
-const express = require('express')
-const Joi = require('joi')
+import express, { json } from 'express';
 const app = express()
-const database = require("./database/RDBMS/relationaldb.ts");
+import { populateDb, isDbReady } from "./database/RDBMS/relationaldb.js";
 
 const port = 8080
 
-app.use(express.json()) // enable JSON parsing in request body, for POST requests
+app.use(json()) // enable JSON parsing in request body, for POST requests
 
 
 
@@ -74,11 +73,12 @@ let testGames = [
   },
 ]
 
+/*
 // TODO: Extract validation logic
-const gameSchema = Joi.object({
-  name: Joi.string().max(20).required(),
-  description: Joi.string().min(1),
-})
+const gameSchema = object({
+  name: string().max(20).required(),
+  description: string().min(1),
+})*/
 
 // Set headers for each request
 app.use((req, res, next) => {
@@ -95,7 +95,7 @@ app.get('/api/strategy', (_req, res) => {
 
 // generate db entries
 app.get('/api/populate', (_req, res) => {
-  database.populateDb();
+  populateDb();
   res.send(":)");
 });
 
@@ -106,7 +106,7 @@ app.get('/api/games', (_req, res) => {
 
 // Add game
 app.post('/api/games', (req, res) => {
-  const {error, value} = gameSchema.validate(req.body)
+  //const {error, value} = gameSchema.validate(req.body)
 
   const newGame = {
     id: testGames.length + 1,
@@ -114,13 +114,7 @@ app.post('/api/games', (req, res) => {
     description: req.body.description || 'No description.',
     reviews: [],
   }
-
-  if (value) {
-    testGames.push(newGame)
-    res.send(newGame)
-  } else {
-    res.status(400).send(error)
-  }
+  res.send(newGame)
 })
 
 // Update Game
@@ -134,13 +128,14 @@ app.put('/api/games/:id', (req, res) => {
     return
   }
 
+  /*
   // Validate
   const {error} = gameSchema.validate(req.body)
 
   if (error) {
     res.status(400).send(error)
     return
-  }
+  }*/
 
   // Update
   const newGame = {...game, name: req.body.name, description: req.body.description}
@@ -160,8 +155,8 @@ app.get('/api/games/:id', (req, res) => {
 })
 
 // test if db works
-app.get('/db', (req, res) => {
-  if (database.isDbReady()) {
+app.get('/db', async (req, res) => {
+  if (await isDbReady()) {
     res.send("Connected!");
   } else {
     res.send("DB connection failed");
