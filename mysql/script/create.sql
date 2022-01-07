@@ -42,7 +42,7 @@ DELIMETER ;
 CREATE TABLE CardGame (
   ID INTEGER AUTO_INCREMENT,
   Name VARCHAR(32), -- assumption
-  Description VARCHAR(1000), -- assumption
+  Description TEXT, -- assumption
   CardTypeID INTEGER,
 
   PRIMARY KEY (ID),
@@ -53,7 +53,7 @@ CREATE TABLE CardGame (
 CREATE TABLE VerifiedCardGame (
   ID INTEGER,
   Comment VARCHAR(280),
-  CreationTimestamp TIMESTAMP,
+  CreationTimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   VerifiedBy VARCHAR(18), -- tweet length
 
   PRIMARY KEY (ID),
@@ -65,7 +65,7 @@ CREATE TABLE Review (
   CardGameID INTEGER,
   ReviewText VARCHAR(280), -- tweet length
   Rating TINYINT,
-  CreationTimestamp TIMESTAMP,
+  CreationTimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (ID, CardGameID),
   FOREIGN KEY (CardGameID) REFERENCES CardGame(ID)
