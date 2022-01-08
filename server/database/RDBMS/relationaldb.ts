@@ -19,6 +19,10 @@ const connect = async () => {
   }
 }
 
+const pickRandomElement = (arr: any[]) => {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export const isDbReady = async () => {
   const con = await connect();
   if (con == undefined) {
@@ -49,12 +53,13 @@ export const populateDb = async () => {
   const dataUsers = fs.readFileSync('./data/users.json', 'utf8');
   const users = JSON.parse(dataUsers);
 
-  let usernames = [];
+  let usernamesUnusedForAdmin = [];
   for (const user of users) {
-    usernames.push(user["username"]);
+    usernamesUnusedForAdmin.push(user["username"]);
 
     con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [user["username"], user["password"], user["email"], user["birthday"]]);
   }
+  const usernames = [...usernamesUnusedForAdmin];
 
   // insert admins
   const dataAdmin = fs.readFileSync('./data/admins.json', 'utf-8');
@@ -62,12 +67,12 @@ export const populateDb = async () => {
 
   let adminUsernames = [];
   for (const admin of admins) {
-    const userIdx = Math.floor(Math.random() * usernames.length);
-    const username = usernames[userIdx];
+    const userIdx = Math.floor(Math.random() * usernamesUnusedForAdmin.length);
+    const username = usernamesUnusedForAdmin[userIdx];
 
-    usernames.splice(userIdx, 1); // remove the promoted user to not pick him again
+    usernamesUnusedForAdmin.splice(userIdx, 1); // remove the promoted user to not pick him again
     
-    const promotedBy = Math.random() > 0.5 ? adminUsernames[Math.floor(Math.random() * adminUsernames.length)] : null;
+    const promotedBy = Math.random() > 0.5 ? pickRandomElement(adminUsernames) : null;
     
     adminUsernames.push(username);
 
@@ -82,26 +87,15 @@ export const populateDb = async () => {
     con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardType["name"], cardType["wikipediaLink"]]);
   }
 
-  // insert caredGames
+  // insert cardGames
   const cardGamesData = fs.readFileSync('./data/cardGames.json', 'utf-8');
   const cardGames = JSON.parse(cardGamesData);
 
   // assume MAX ID will be the highest current inserted => +1 = start ID of the inserted
   
-  //HELP :(
   const maxIDQuery = await con.execute('SELECT MAX(ID) AS max_id FROM CardGame');
-  console.log(maxIDQuery);
-  console.log("-----------");
-  console.log(maxIDQuery[0]);
-  console.log("-----------");
-  console.log(maxIDQuery[1]);
-  //const test = maxIDQuery[1].;
-
-  /*
-  const minID = maxIDQuery == null ? 1;
-
-  console.log(minID);
-  console.log("aaaaaaaaaaaaaaaaaaaaaaaaa");
+  const {maxIDQueryResult} = (maxIDQuery[0] as mysql.RowDataPacket[])[0];
+  const minID = maxIDQueryResult || 1;
 
   let maxID = minID - 1;
   for (const cardGame in cardGames) {
@@ -109,21 +103,12 @@ export const populateDb = async () => {
     maxID += 1;
   }
 
-  console.log(minID);
-  console.log(maxID);
-
-  // for whatever reason this does not work.
-  // const maxID = minID + cardGames.length();
-
   // insert verifiedCardGames
-  // TODO: THIS DOES NOT WORK! THE MINID QUERIED FROM THE PREVIOUS STATEMENT IS IN AN ASSYNC STATEMENT SO IT IS NOT SET YET
-  // I DONT KNOW HOW TO SOLVE THIS YET. THE QUERY STATEMENT MAY BE WRONG AS WELL
-  /*
   const verifiedCardGamesData = fs.readFileSync('./data/verifiedCardGames.json', 'utf-8');
   const verifiedCardGames = JSON.parse(verifiedCardGamesData);
 
-  let usedCardGameIDs = []
-  for (const verifiedCardGame in verifiedCardGames) {
+  let usedCardGameIDs: number[] = []
+  for (const verifiedCardGame of verifiedCardGames) {
     let cardGameID;
     do {
       cardGameID = Math.floor(Math.random() * (maxID - minID) + minID);
@@ -131,9 +116,32 @@ export const populateDb = async () => {
     } while (usedCardGameIDs.includes(cardGameID));
     usedCardGameIDs.push(cardGameID);
 
-    const verifiedBy = adminUsernames[Math.floor(Math.random() * adminUsernames.length)];
-    con.query('INSERT INTO VerifiedCardGame(ID, Description, VerifiedBy) VALUES (?, ?, ?)', [cardGameID, verifiedCardGames[verifiedCardGame]["description"], ])
+    const verifiedBy = pickRandomElement(adminUsernames);
+    con.query('INSERT INTO VerifiedCardGame(ID, Comment, VerifiedBy) VALUES (?, ?, ?)', [cardGameID, verifiedCardGame["comment"], verifiedBy]);
   }
-  */
 
+  // insert reviews
+  const reviewsData = fs.readFileSync('./data/reviews.json', 'utf-8');
+  const reviews = JSON.parse(reviewsData);
+
+  for (const review of reviews) {
+    const cardGameID = pickRandomElement(usedCardGameIDs);
+    const username = pickRandomElement(usernames);
+
+    con.query('INSERT INTO Review(CardGameID, LeftBy, ReviewText, Rating) VALUES (?, ?, ?, ?)', [cardGameID, username, review['reviewText'], review['rating']]);
+  }
+
+  // insert favorites
+  const FAVORITES_COUNT = 500;
+
+  for (let i = 0; i < FAVORITES_COUNT; ++i) {
+    const username = pickRandomElement(usernames);
+    const cardGameID = Math.floor(Math.random() * (maxID - minID) + minID);
+
+    try {
+      con.query('INSERT INTO favorites VALUES (?, ?)', [username, cardGameID]);
+    } catch (e: unknown) {
+      --i; // repeat the for loop iteration if insertion failed (= pair already inserted)
+    }
+  }
 }

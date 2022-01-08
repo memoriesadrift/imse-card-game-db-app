@@ -63,12 +63,14 @@ CREATE TABLE VerifiedCardGame (
 CREATE TABLE Review (
   ID INTEGER AUTO_INCREMENT,
   CardGameID INTEGER,
+  LeftBy VARCHAR(18),
   ReviewText VARCHAR(280), -- tweet length
   Rating TINYINT,
   CreationTimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (ID, CardGameID),
-  FOREIGN KEY (CardGameID) REFERENCES CardGame(ID)
+  FOREIGN KEY (CardGameID) REFERENCES CardGame(ID),
+  FOREIGN KEY (LeftBy) REFERENCES User(Username)
 );
 
 CREATE TABLE favorites (
