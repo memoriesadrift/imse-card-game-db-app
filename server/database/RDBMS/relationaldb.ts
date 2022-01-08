@@ -38,68 +38,67 @@ export const isDbReady = async () => {
 }
 
 export const populateDb = async () => {
-}
-/*
+
+  const con = await connect();
+  if (con == undefined) {
+    console.log("Failed to create db connection");
+    return;
+  }
+
   // insert users
-  let usernames = [];
-
   const dataUsers = fs.readFileSync('./data/users.json', 'utf8');
-
   const users = JSON.parse(dataUsers);
 
-  for (const user in users) {
-    usernames.push(users[user]["username"]);
-    console.log(users[user]["username"]);
+  let usernames = [];
+  for (const user of users) {
+    usernames.push(user["username"]);
 
-    // use the ? notation to escape the values. Prevents sql injection.
-    //con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [users[user]["username"], users[user]["password"], users[user]["email"], users[user]["birthday"]]);
+    con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [user["username"], user["password"], user["email"], user["birthday"]]);
   }
 
   // insert admins
   const dataAdmin = fs.readFileSync('./data/admins.json', 'utf-8');
-
   const admins = JSON.parse(dataAdmin);
+
   let adminUsernames = [];
-  for (const admin in admins) {
+  for (const admin of admins) {
     const userIdx = Math.floor(Math.random() * usernames.length);
     const username = usernames[userIdx];
-    usernames.splice(userIdx, 1);
+
+    usernames.splice(userIdx, 1); // remove the promoted user to not pick him again
     
     const promotedBy = Math.random() > 0.5 ? adminUsernames[Math.floor(Math.random() * adminUsernames.length)] : null;
+    
     adminUsernames.push(username);
 
-    //con.query('INSERT INTO Admin VALUES (?, ?, ?, ?)', [username, admins[admin]["realname"], admins[admin]["profiledescription"], promotedBy]);
+    con.query('INSERT INTO Admin VALUES (?, ?, ?, ?)', [username, admin["realname"], admin["profiledescription"], promotedBy]);
   }
   
   // insert cardTypes
   const cardTypeData = fs.readFileSync('./data/cardTypes.json', 'utf-8');
   const cardTypes = JSON.parse(cardTypeData);
 
-  for (const cardType in cardTypes) {
-    con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardTypes[cardType]["name"], cardTypes[cardType]["wikipediaLink"]]);
+  for (const cardType of cardTypes) {
+    con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardType["name"], cardType["wikipediaLink"]]);
   }
 
   // insert caredGames
   const cardGamesData = fs.readFileSync('./data/cardGames.json', 'utf-8');
   const cardGames = JSON.parse(cardGamesData);
 
-  let minID;
-  const processMaxID = (x) => minID = x;
-
   // assume MAX ID will be the highest current inserted => +1 = start ID of the inserted
-  con.query('SELECT MAX(ID) FROM CardGame', async (err, res) => {
-    if (err) {
-      console.log(err);
-      return -1;
-    }
+  
+  //HELP :(
+  const maxIDQuery = await con.execute('SELECT MAX(ID) AS max_id FROM CardGame');
+  console.log(maxIDQuery);
+  console.log("-----------");
+  console.log(maxIDQuery[0]);
+  console.log("-----------");
+  console.log(maxIDQuery[1]);
+  //const test = maxIDQuery[1].;
 
-    if (res == null) {
-      //minID = 1;
-      return 1;
-    }
-    //minID = res + 1;
-    return res + 1
-  });
+  /*
+  const minID = maxIDQuery == null ? 1;
 
   console.log(minID);
   console.log("aaaaaaaaaaaaaaaaaaaaaaaaa");
@@ -136,6 +135,5 @@ export const populateDb = async () => {
     con.query('INSERT INTO VerifiedCardGame(ID, Description, VerifiedBy) VALUES (?, ?, ?)', [cardGameID, verifiedCardGames[verifiedCardGame]["description"], ])
   }
   */
-/*
+
 }
-*/
