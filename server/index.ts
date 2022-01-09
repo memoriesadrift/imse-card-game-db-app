@@ -96,9 +96,9 @@ app.get('/api/strategy', (_req, res) => {
 // generate db entries
 app.get('/api/populate', async (_req, res) => {
   if (await populateDb()) {
-    res.send(`{"success": true}`);
+    res.send({"success": true});
   } else {
-    res.send(`{"success": false}`);
+    res.send({"success": false});
   }
 });
 
