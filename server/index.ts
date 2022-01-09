@@ -96,9 +96,9 @@ app.get('/api/strategy', (_req, res) => {
 // generate db entries
 app.get('/api/populate', async (_req, res) => {
   if (await populateDb()) {
-    res.send({"success": true});
+    res.status(200).send({"success": true});
   } else {
-    res.send({"success": false});
+    res.status(500).send({"success": false});
   }
 });
 
@@ -160,9 +160,9 @@ app.get('/api/games/:id', (req, res) => {
 // test if db works
 app.get('/db', async (req, res) => {
   if (await isDbReady()) {
-    res.send("Connected!");
+    res.status(200).send("Connected!");
   } else {
-    res.send("DB connection failed");
+    res.status(500).send("DB connection failed");
   }
 });
 
