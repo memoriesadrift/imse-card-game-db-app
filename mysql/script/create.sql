@@ -41,7 +41,7 @@ DELIMETER ;
 
 CREATE TABLE CardGame (
   ID INTEGER AUTO_INCREMENT,
-  Name VARCHAR(32), -- assumption
+  Name NVARCHAR(50), -- assumption; NVARCHAR for unicode
   Description TEXT, -- assumption
   CardTypeID INTEGER,
 

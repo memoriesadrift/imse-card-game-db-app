@@ -1,4 +1,5 @@
 import fs, { truncate } from 'fs';
+import { string } from 'joi';
 //const mysql = require('mysql2/promise');
 import mysql from 'mysql2/promise';
 import { ReadableStreamDefaultController } from 'stream/web';
@@ -106,20 +107,28 @@ const dbInsertion =async () => {
   const cardTypeData = fs.readFileSync('./data/cardTypes.json', 'utf-8');
   const cardTypes = JSON.parse(cardTypeData);
 
+  let cardTypeId:{ [key: string]: number } = {};
   for (const cardType of cardTypes) {
-    await con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardType["name"], cardType["wikipediaLink"]]);
+    const cardTypeRes = await con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardType["name"], cardType["wikipediaLink"]]);
+    cardTypeId[cardType["name"]] = (cardTypeRes as mysql.RowDataPacket[])[0].insertId
   }
 
   // insert cardGames
   console.log("Inserting card games");
   const cardGamesData = fs.readFileSync('./data/cardGames.json', 'utf-8');
   const cardGames = JSON.parse(cardGamesData);
+  const cardGameDescriptionsData = fs.readFileSync('./data/cardGameDescriptions.json', 'utf-8');
+  const cardGameDescriptions = JSON.parse(cardGameDescriptionsData);
 
   let minID;
   let maxID = 0;
   let first = true;
-  for (const cardGame in cardGames) {
-    const cardGameRes = await con.query('INSERT INTO CardGame(Name, Description, CardTypeID) VALUES (?, ?, ?)', [cardGames[cardGame]["name"], cardGames[cardGame]["description"], cardGames[cardGame]["cardType"]]);
+  for (const cardGameIdx in cardGames) {
+    const myCardTypeId = cardTypeId[cardGames[cardGameIdx]["cardType"][0]];
+
+    const cardGameRes = await con.query('INSERT INTO CardGame(Name, Description, CardTypeID) VALUES (?, ?, ?)', [cardGames[cardGameIdx]["cardGame"],
+        cardGameDescriptions[cardGameIdx]["description"], myCardTypeId]);
+
     if (first) {
       minID = (cardGameRes as mysql.RowDataPacket[])[0].insertId;
       maxID = minID - 1;
