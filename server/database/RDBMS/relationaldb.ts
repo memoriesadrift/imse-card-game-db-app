@@ -1,6 +1,8 @@
-import fs from 'fs';
+import fs, { truncate } from 'fs';
 //const mysql = require('mysql2/promise');
 import mysql from 'mysql2/promise';
+import { ReadableStreamDefaultController } from 'stream/web';
+import { fileURLToPath } from 'url';
 
 // establish db connection
 
@@ -14,7 +16,6 @@ const connect = async () => {
     });
     return con;
   } catch (e: unknown) {
-    console.log("oh istenem");
     return undefined;
   }
 }
@@ -23,6 +24,26 @@ const pickRandomElement = (arr: any[]) => {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const truncateDb = async () => {
+  const con = await connect();
+  if (con == undefined) {
+    console.log("Failed to create db connection");
+    return;
+  }
+
+  console.log("Deleting Rows from tables");
+
+  await con.query("DELETE FROM User");
+  await con.query("DELETE FROM Admin");
+  await con.query("DELETE FROM CardType");
+  await con.query("ALTER TABLE CardType AUTO_INCREMENT=1")
+  await con.query("DELETE FROM CardGame");
+  await con.query("DELETE FROM VerifiedCardGame");
+  await con.query("DELETE FROM Review");
+  await con.query("DELETE FROM favorites");
+}
+
+
 export const isDbReady = async () => {
   const con = await connect();
   if (con == undefined) {
@@ -30,7 +51,6 @@ export const isDbReady = async () => {
     return false;
   }
   
-  console.log("moment of truth");
   try {
     await con.connect();
     console.log("connection successful");
@@ -41,8 +61,8 @@ export const isDbReady = async () => {
   }
 }
 
-export const populateDb = async () => {
-
+const dbInsertion =async () => {
+  
   const con = await connect();
   if (con == undefined) {
     console.log("Failed to create db connection");
@@ -50,6 +70,7 @@ export const populateDb = async () => {
   }
 
   // insert users
+  console.log("Inserting users");
   const dataUsers = fs.readFileSync('./data/users.json', 'utf8');
   const users = JSON.parse(dataUsers);
 
@@ -57,11 +78,12 @@ export const populateDb = async () => {
   for (const user of users) {
     usernamesUnusedForAdmin.push(user["username"]);
 
-    con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [user["username"], user["password"], user["email"], user["birthday"]]);
+    await con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [user["username"], user["password"], user["email"], user["birthday"]]); 
   }
   const usernames = [...usernamesUnusedForAdmin];
 
   // insert admins
+  console.log("Inserting admins")
   const dataAdmin = fs.readFileSync('./data/admins.json', 'utf-8');
   const admins = JSON.parse(dataAdmin);
 
@@ -76,34 +98,39 @@ export const populateDb = async () => {
     
     adminUsernames.push(username);
 
-    con.query('INSERT INTO Admin VALUES (?, ?, ?, ?)', [username, admin["realname"], admin["profiledescription"], promotedBy]);
+    await con.query('INSERT INTO Admin VALUES (?, ?, ?, ?)', [username, admin["realname"], admin["profiledescription"], promotedBy]);
   }
   
   // insert cardTypes
+  console.log("Inserting card types")
   const cardTypeData = fs.readFileSync('./data/cardTypes.json', 'utf-8');
   const cardTypes = JSON.parse(cardTypeData);
 
   for (const cardType of cardTypes) {
-    con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardType["name"], cardType["wikipediaLink"]]);
+    await con.query('INSERT INTO CardType(Name, WikipediaLink) VALUES (?, ?)', [cardType["name"], cardType["wikipediaLink"]]);
   }
 
   // insert cardGames
+  console.log("Inserting card games");
   const cardGamesData = fs.readFileSync('./data/cardGames.json', 'utf-8');
   const cardGames = JSON.parse(cardGamesData);
 
-  // assume MAX ID will be the highest current inserted => +1 = start ID of the inserted
-  
-  const maxIDQuery = await con.execute('SELECT MAX(ID) AS max_id FROM CardGame');
-  const {maxIDQueryResult} = (maxIDQuery[0] as mysql.RowDataPacket[])[0];
-  const minID = maxIDQueryResult || 1;
-
-  let maxID = minID - 1;
+  let minID;
+  let maxID = 0;
+  let first = true;
   for (const cardGame in cardGames) {
-    con.query('INSERT INTO CardGame(Name, Description, CardTypeID) VALUES (?, ?, ?)', [cardGames[cardGame]["name"], cardGames[cardGame]["description"], cardGames[cardGame]["cardType"]]);
+    const cardGameRes = await con.query('INSERT INTO CardGame(Name, Description, CardTypeID) VALUES (?, ?, ?)', [cardGames[cardGame]["name"], cardGames[cardGame]["description"], cardGames[cardGame]["cardType"]]);
+    if (first) {
+      minID = (cardGameRes as mysql.RowDataPacket[])[0].insertId;
+      maxID = minID - 1;
+      first = false;
+    }
+
     maxID += 1;
   }
 
   // insert verifiedCardGames
+  console.log("Inserting verified card games");
   const verifiedCardGamesData = fs.readFileSync('./data/verifiedCardGames.json', 'utf-8');
   const verifiedCardGames = JSON.parse(verifiedCardGamesData);
 
@@ -112,15 +139,15 @@ export const populateDb = async () => {
     let cardGameID;
     do {
       cardGameID = Math.floor(Math.random() * (maxID - minID) + minID);
-      //console.log(cardGameID);
     } while (usedCardGameIDs.includes(cardGameID));
     usedCardGameIDs.push(cardGameID);
 
     const verifiedBy = pickRandomElement(adminUsernames);
-    con.query('INSERT INTO VerifiedCardGame(ID, Comment, VerifiedBy) VALUES (?, ?, ?)', [cardGameID, verifiedCardGame["comment"], verifiedBy]);
+    await con.query('INSERT INTO VerifiedCardGame(ID, Comment, VerifiedBy) VALUES (?, ?, ?)', [cardGameID, verifiedCardGame["comment"], verifiedBy]);
   }
 
   // insert reviews
+  console.log("Inserting reviews");
   const reviewsData = fs.readFileSync('./data/reviews.json', 'utf-8');
   const reviews = JSON.parse(reviewsData);
 
@@ -128,10 +155,11 @@ export const populateDb = async () => {
     const cardGameID = pickRandomElement(usedCardGameIDs);
     const username = pickRandomElement(usernames);
 
-    con.query('INSERT INTO Review(CardGameID, LeftBy, ReviewText, Rating) VALUES (?, ?, ?, ?)', [cardGameID, username, review['reviewText'], review['rating']]);
+    await con.query('INSERT INTO Review(CardGameID, LeftBy, ReviewText, Rating) VALUES (?, ?, ?, ?)', [cardGameID, username, review['reviewText'], review['rating']]);
   }
 
   // insert favorites
+  console.log("Inserting favorites");
   const FAVORITES_COUNT = 500;
 
   for (let i = 0; i < FAVORITES_COUNT; ++i) {
@@ -139,9 +167,26 @@ export const populateDb = async () => {
     const cardGameID = Math.floor(Math.random() * (maxID - minID) + minID);
 
     try {
-      con.query('INSERT INTO favorites VALUES (?, ?)', [username, cardGameID]);
+      await con.query('INSERT INTO favorites VALUES (?, ?)', [username, cardGameID]);
     } catch (e: unknown) {
       --i; // repeat the for loop iteration if insertion failed (= pair already inserted)
     }
   }
+
+  console.log("Finnished inserting");
+}
+
+export const populateDb = async () => {
+  await truncateDb();
+
+  try {
+    await dbInsertion();
+  } catch (e: unknown) {
+    console.log("Encountered error when inserting data: ");
+    console.log(e);
+    await truncateDb();
+    return false;
+  }
+
+  return true;
 }
