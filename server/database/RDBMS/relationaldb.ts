@@ -258,6 +258,7 @@ export class RelationalDb implements IDatabase {
       let cardGameObj:CardGame = {} as CardGame;
       cardGameObj.id = cardGame.CardGameID;
       cardGameObj.name = cardGame.CardGameName;
+      cardGameObj.description = cardGame.Description;
       cardGameObj.cardType = {
         id: cardGame.CardTypeID,
         name: cardGame.CardTypeName,
@@ -318,6 +319,7 @@ export class RelationalDb implements IDatabase {
     let cardGameObj:CardGame = {} as CardGame;
     cardGameObj.id = cardGame.CardGameID;
     cardGameObj.name = cardGame.CardGameName;
+    cardGameObj.description = cardGame.Description;
     cardGameObj.cardType = {
       id: cardGame.CardTypeID,
       name: cardGame.CardTypeName,
