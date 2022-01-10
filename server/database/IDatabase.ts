@@ -2,6 +2,6 @@
 interface IDatabase {
 
   isDBReady(): Promise<boolean>;
-  populateDB(): void;
+  populateDB(): Promise<void>;
 
 }
