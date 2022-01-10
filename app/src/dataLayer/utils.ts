@@ -1,4 +1,16 @@
-import { CardType, Review, URL, Verification } from "../types"
+import { CardType, Review, WebLink, Verification, CardGame } from "../types"
+
+export const parseCardType = (json: any) => {
+    const cardType: {cardType: CardType} = {
+        cardType: {
+            name: json.name,
+            id: json.id,
+            wikipediaLink: json.wikipediaLink as WebLink,
+        }
+    }
+
+    return cardType
+}
 
 export const parseCardGame = (json: any) =>  {
     const baseObj = {
@@ -11,7 +23,7 @@ export const parseCardGame = (json: any) =>  {
         cardType: {
             name: json.cardType.name,
             id: json.cardType.id,
-            wikipediaLink: json.cardType.wikipediaLink as URL,
+            wikipediaLink: json.cardType.wikipediaLink as WebLink,
         }
     }
 
@@ -36,4 +48,19 @@ export const parseCardGame = (json: any) =>  {
     } : {}
 
     return {...baseObj, ...cardType, ...reviews, ...verification}
+}
+
+// TODO: implement
+export const cardTypeFromName = (name: string): CardType => { return {
+      id: 1,
+      name: 'French-suited playing cards',
+      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards' as WebLink,
+}}
+
+export const buildNewCardGameObject = (name: string, description: string, cardType: CardType): CardGame => {
+    return {
+        ...{name, description, cardType},
+        id: -1, // discarded by server
+        reviews: [],
+    }
 }

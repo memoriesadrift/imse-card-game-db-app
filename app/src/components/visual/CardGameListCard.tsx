@@ -18,6 +18,11 @@ export default function CardGameListCard({game}: CardGameListCardProps) {
                         <Link href={game.cardType.wikipediaLink}><a className="uk-text-meta uk-margin-remove-top">{`Uses ${game.cardType.name}`}</a></Link>
                     </div>
                 </div>
+                <div className='uk-position-right uk-padding'>
+                    <Link href={`/games/edit/${game.id}`}>
+                        <a uk-icon="icon: pencil; ratio: 1.5"/>
+                    </Link>
+                </div>
             </div>
             <div className="uk-card-body">
                 <p>{game.description}</p>

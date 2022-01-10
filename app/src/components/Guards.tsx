@@ -30,3 +30,43 @@ export function QueryGuard<T>({
   }
   return (isLoading) ? <FullPageLoading /> : null
 }
+
+type MutationGuardProps<T> = {
+    isLoading: boolean
+    error: unknown
+    data: T
+}
+
+
+export function MutationGuard<T>({
+  isLoading, error, data
+}: MutationGuardProps<T>) {
+  if (isLoading) {
+      return (
+        <p className='uk-flex uk-flex-center'>
+          Loading...
+        </p>
+      )
+  }
+
+  if (error) {
+      return (
+        <div className="uk-alert-danger uk-card uk-card-default uk-width-1-2@m uk-align-center" uk-alert>
+          <div className='uk-card-body'>
+            <h5 className='uk-text-emphasis'>
+              There was en error executing the request...
+            </h5>
+          </div>
+        </div>            
+      )
+  }
+
+  if (data) {
+      return (
+        <p className='uk-flex uk-flex-center'>
+          Successfuly executed your request!
+        </p>
+      )
+  }
+  else return null
+}

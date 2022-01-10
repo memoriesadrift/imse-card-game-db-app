@@ -1,8 +1,8 @@
 import type { NextPage } from 'next'
-import { QueryGuard } from '../src/components/Guards'
-import Navbar from '../src/components/Navbar'
-import CardGameListCard from '../src/components/visual/CardGameListCard'
-import { useGetCardGames } from '../src/dataLayer'
+import { QueryGuard } from '../../src/components/Guards'
+import Navbar from '../../src/components/Navbar'
+import CardGameListCard from '../../src/components/visual/CardGameListCard'
+import { useGetCardGames } from '../../src/dataLayer'
 
 const Games: NextPage = () => {
   const gameListQuery = useGetCardGames()
@@ -10,7 +10,7 @@ const Games: NextPage = () => {
   return (
     <>
       <Navbar />
-      <h1 className="uk-heading-medium uk-text-center">Home</h1>
+      <h1 className="uk-heading-medium uk-text-center">Games</h1>
       <QueryGuard {...gameListQuery}>
         {(gameList) => (
           <ul className='uk-list'>
