@@ -1,5 +1,7 @@
+import { Console } from 'console';
 import fs, { truncate } from 'fs';
 import mysql from 'mysql2/promise';
+import { CardGame, Review, CardType, Verification } from '../../types';
 import { IDatabase } from '../IDatabase'
 
 export class RelationalDb implements IDatabase {
@@ -230,6 +232,63 @@ export class RelationalDb implements IDatabase {
     }
   
     return true;
+  }
+
+  async getCardGames(): Promise<CardGame[] | undefined>  {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return undefined;
+    }
+
+    const cardGamesRes = await con.query(`SELECT CardGame.ID AS CardGameID,
+     CardGame.Name AS CardGameName,
+     Description, CardTypeID,
+     CardType.ID AS CardTypeID,
+     CardType.Name AS CardTypeName,
+     VerifiedCardGame.ID AS VerifiedCardGameID,
+     Comment, CreationTimestamp, VerifiedBy,
+     WikipediaLink FROM CardGame LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
+     LEFT JOIN VerifiedCardGame ON CardGame.ID = VerifiedCardGame.ID`);
+
+    const cardGames = (cardGamesRes[0] as mysql.RowDataPacket[]);
+
+    let cardGameObjs: CardGame[] = [];
+    for (const cardGame of cardGames) {
+      let cardGameObj:CardGame = {} as CardGame;
+      cardGameObj.id = cardGame.CardGameID;
+      cardGameObj.name = cardGame.CardGameName;
+      cardGameObj.cardType = {
+        id: cardGame.CardTypeID,
+        name: cardGame.CardTypeName,
+        wikipediaLink: cardGame.WikipediaLink
+      };
+
+      const reviewsRes = await con.query('SELECT * FROM Review WHERE CardGameID = ?', [cardGame.CardGameID]);
+      const reviews = (reviewsRes[0] as mysql.RowDataPacket[]);
+      
+      cardGameObj.reviews = reviews.map((review):Review => {
+        return {
+          id: review.ID, 
+          text: review.ReviewText, 
+          rating: review.Rating,
+          timestamp: review.CreationTimestamp,
+          leftByUser: review.LeftBy
+        }
+      });
+
+      if (cardGame.VerifiedCardGameID != null) {
+        cardGameObj.verification = {
+          comment: cardGame.Comment,
+          timestamp: cardGame.CreationTimestamp,
+          verifiedByAdmin: cardGame.VerifiedBy
+        };
+      }
+
+      cardGameObjs.push(cardGameObj);
+    }
+
+    return cardGameObjs;
   }
 
 }

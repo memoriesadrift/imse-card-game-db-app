@@ -98,8 +98,14 @@ app.get('/api/populate', async (_req, res) => {
 });
 
 // List games
-app.get('/api/games', (_req, res) => {
-  res.send(testGames)
+app.get('/api/games', async (_req, res) => {
+  const cardGames = await database.getCardGames();
+  
+  if (!cardGames) {
+    res.status(500).send({});
+  } else {
+    res.status(200).send(cardGames);
+  }
 })
 
 // Add game
