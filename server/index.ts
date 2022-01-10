@@ -74,12 +74,6 @@ let testGames = [
   },
 ]
 
-/*
-// TODO: Extract validation logic
-const gameSchema = object({
-  name: string().max(20).required(),
-  description: string().min(1),
-})*/
 
 // Set headers for each request
 app.use((req, res, next) => {
@@ -110,7 +104,6 @@ app.get('/api/games', (_req, res) => {
 
 // Add game
 app.post('/api/games', (req, res) => {
-  //const {error, value} = gameSchema.validate(req.body)
 
   const newGame = {
     id: testGames.length + 1,
@@ -131,15 +124,6 @@ app.put('/api/games/:id', (req, res) => {
     res.status(404).send('The game with the given ID could not be found.')
     return
   }
-
-  /*
-  // Validate
-  const {error} = gameSchema.validate(req.body)
-
-  if (error) {
-    res.status(400).send(error)
-    return
-  }*/
 
   // Update
   const newGame = {...game, name: req.body.name, description: req.body.description}

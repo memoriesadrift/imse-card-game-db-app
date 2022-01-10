@@ -1,6 +1,6 @@
 import fs, { truncate } from 'fs';
 import mysql from 'mysql2/promise';
-import './database/IDatabase';
+import { IDatabase } from '../IDatabase'
 
 export class RelationalDb implements IDatabase {
   
