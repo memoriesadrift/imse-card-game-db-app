@@ -11,6 +11,7 @@ export const parseCardType = (json: any) => {
 
     return cardType
 }
+
 export const parseCardGame = (json: any) =>  {
     const baseObj = {
         id: parseInt(json.id),
