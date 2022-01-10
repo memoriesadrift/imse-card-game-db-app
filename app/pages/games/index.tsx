@@ -10,7 +10,7 @@ const Games: NextPage = () => {
   return (
     <>
       <Navbar />
-      <h1 className="uk-heading-medium uk-text-center">Home</h1>
+      <h1 className="uk-heading-medium uk-text-center">Games</h1>
       <QueryGuard {...gameListQuery}>
         {(gameList) => (
           <ul className='uk-list'>

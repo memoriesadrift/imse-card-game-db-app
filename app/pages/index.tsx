@@ -12,8 +12,8 @@ const Home: NextPage = () => {
       <Navbar />
       <h1 className="uk-heading-medium uk-text-center">Home</h1>
         <div className='uk-flex uk-flex-center uk-button-group'>
-          <button className="uk-button uk-button-large" onClick={async () => await populateDatabase.mutateAsync()}>Populate Database</button>  
-          <button className="uk-button uk-button-large" onClick={async () => await migrateDatabase.mutateAsync()}>Migrate SQL to NoSQL</button>  
+          <button className="uk-button uk-button-large" onClick={() => populateDatabase.mutate()}>Populate Database</button>  
+          <button className="uk-button uk-button-large" onClick={() => migrateDatabase.mutate()}>Migrate SQL to NoSQL</button>  
         </div>
       <MutationGuard {...populateDatabase} />
       <MutationGuard {...migrateDatabase} />
