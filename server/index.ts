@@ -1,12 +1,13 @@
 // TODO: Upgrade to TS
 import express, { json } from 'express';
 const app = express()
-import { populateDb, isDbReady } from "./database/RDBMS/relationaldb.js";
+import {RelationalDb} from "./database/RDBMS/relationaldb.js";
 
 const port = 8080
 
 app.use(json()) // enable JSON parsing in request body, for POST requests
 
+const database = new RelationalDb();
 
 
 let testGames = [
@@ -95,7 +96,7 @@ app.get('/api/strategy', (_req, res) => {
 
 // generate db entries
 app.get('/api/populate', async (_req, res) => {
-  if (await populateDb()) {
+  if (await database.populateDB()) {
     res.status(200).send({"success": true});
   } else {
     res.status(500).send({"success": false});
@@ -159,7 +160,7 @@ app.get('/api/games/:id', (req, res) => {
 
 // test if db works
 app.get('/db', async (req, res) => {
-  if (await isDbReady()) {
+  if (await database.isDBReady()) {
     res.status(200).send("Connected!");
   } else {
     res.status(500).send("DB connection failed");
