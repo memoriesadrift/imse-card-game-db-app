@@ -1,7 +1,7 @@
 import { useQuery } from "react-query"
 import { CardGame, CardType } from "../types"
 import { baseUri } from "./constants"
-import { parseCardGame } from "./utils"
+import { parseCardGame, parseCardType } from "./utils"
 
 export const useGetCardGames = () => {
     return useQuery('card-games', async (): Promise<Array<CardGame>> => {
@@ -19,5 +19,25 @@ export const useGetCardGame = (id: number | undefined) => {
         const response = await fetch(uri).then((res) => res.json())
 
         return parseCardGame(response)
+    })
+}
+
+// Reporting
+
+export const useGetMostReviewedCardTypes =  () => {
+    return useQuery('most-reviewed-card-type', async (): Promise<Array<CardType>> => {
+        const uri = `${baseUri}/reports/1`
+        const response = await fetch(uri).then((res) => res.json())
+
+        return response.map((rawRes: any) => parseCardType(rawRes))
+    })
+}
+
+export const useGetPopularCardGamesForTeens = () => {
+    return useQuery('most-popular-games-for-teens', async (): Promise<Array<CardGame>> => {
+        const uri = `${baseUri}/reports/2`
+        const response = await fetch(uri).then((res) => res.json())
+
+        return response.map((rawRes: any) => parseCardGame(rawRes))
     })
 }

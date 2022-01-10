@@ -1,5 +1,16 @@
 import { CardType, Review, WebLink, Verification } from "../types"
 
+export const parseCardType = (json: any) => {
+    const cardType: {cardType: CardType} = {
+        cardType: {
+            name: json.name,
+            id: json.id,
+            wikipediaLink: json.wikipediaLink as WebLink,
+        }
+    }
+
+    return cardType
+}
 export const parseCardGame = (json: any) =>  {
     const baseObj = {
         id: parseInt(json.id),
