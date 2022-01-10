@@ -234,6 +234,38 @@ export class RelationalDb implements IDatabase {
     return true;
   }
 
+  private extractCardGame(cardGameRowData: mysql.RowDataPacket, reviewRowData: mysql.RowDataPacket[]): CardGame {
+    let cardGameObj:CardGame = {} as CardGame;
+    cardGameObj.id = cardGameRowData.CardGameID;
+    cardGameObj.name = cardGameRowData.CardGameName;
+    cardGameObj.description = cardGameRowData.Description;
+    cardGameObj.cardType = {
+      id: cardGameRowData.CardTypeID,
+      name: cardGameRowData.CardTypeName,
+      wikipediaLink: cardGameRowData.WikipediaLink
+    };
+    
+    cardGameObj.reviews = reviewRowData.map((review):Review => {
+      return {
+        id: review.ID, 
+        text: review.ReviewText, 
+        rating: review.Rating,
+        timestamp: review.CreationTimestamp,
+        leftByUser: review.LeftBy
+      }
+    });
+
+    if (cardGameRowData.VerifiedCardGameID != null) {
+      cardGameObj.verification = {
+        comment: cardGameRowData.Comment,
+        timestamp: cardGameRowData.CreationTimestamp,
+        verifiedByAdmin: cardGameRowData.VerifiedBy
+      };
+    }
+    
+    return cardGameObj;
+  }
+
   async getCardGames(): Promise<CardGame[] | undefined>  {
     const con = await this.connect();
     if (!con) {
@@ -255,36 +287,10 @@ export class RelationalDb implements IDatabase {
 
     let cardGameObjs: CardGame[] = [];
     for (const cardGame of cardGames) {
-      let cardGameObj:CardGame = {} as CardGame;
-      cardGameObj.id = cardGame.CardGameID;
-      cardGameObj.name = cardGame.CardGameName;
-      cardGameObj.description = cardGame.Description;
-      cardGameObj.cardType = {
-        id: cardGame.CardTypeID,
-        name: cardGame.CardTypeName,
-        wikipediaLink: cardGame.WikipediaLink
-      };
-
       const reviewsRes = await con.query('SELECT * FROM Review WHERE CardGameID = ?', [cardGame.CardGameID]);
       const reviews = (reviewsRes[0] as mysql.RowDataPacket[]);
-      
-      cardGameObj.reviews = reviews.map((review):Review => {
-        return {
-          id: review.ID, 
-          text: review.ReviewText, 
-          rating: review.Rating,
-          timestamp: review.CreationTimestamp,
-          leftByUser: review.LeftBy
-        }
-      });
 
-      if (cardGame.VerifiedCardGameID != null) {
-        cardGameObj.verification = {
-          comment: cardGame.Comment,
-          timestamp: cardGame.CreationTimestamp,
-          verifiedByAdmin: cardGame.VerifiedBy
-        };
-      }
+      const cardGameObj = this.extractCardGame(cardGame, reviews);
 
       cardGameObjs.push(cardGameObj);
     }
@@ -316,38 +322,10 @@ export class RelationalDb implements IDatabase {
       return undefined;
     }
 
-    let cardGameObj:CardGame = {} as CardGame;
-    cardGameObj.id = cardGame.CardGameID;
-    cardGameObj.name = cardGame.CardGameName;
-    cardGameObj.description = cardGame.Description;
-    cardGameObj.cardType = {
-      id: cardGame.CardTypeID,
-      name: cardGame.CardTypeName,
-      wikipediaLink: cardGame.WikipediaLink
-    };
-
     const reviewsRes = await con.query('SELECT * FROM Review WHERE CardGameID = ?', [cardGame.CardGameID]);
     const reviews = (reviewsRes[0] as mysql.RowDataPacket[]);
-    
-    cardGameObj.reviews = reviews.map((review):Review => {
-      return {
-        id: review.ID, 
-        text: review.ReviewText, 
-        rating: review.Rating,
-        timestamp: review.CreationTimestamp,
-        leftByUser: review.LeftBy
-      }
-    });
 
-    if (cardGame.VerifiedCardGameID != null) {
-      cardGameObj.verification = {
-        comment: cardGame.Comment,
-        timestamp: cardGame.CreationTimestamp,
-        verifiedByAdmin: cardGame.VerifiedBy
-      };
-    }
-
-    return cardGameObj;
+    return this.extractCardGame(cardGame, reviews);;
   }
 
 }
