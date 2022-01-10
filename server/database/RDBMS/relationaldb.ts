@@ -9,19 +9,25 @@ export class RelationalDb implements IDatabase {
   private PASSWORD = "ise-password";
   private DATABASE = "card-game";
 
+
+  private pool: mysql.Pool | undefined = undefined;
   /**
    * Establishes a connection with the database.
    * @returns the connection object or undefined if failed to connect
    */
   private connect = async () => {
+    if (this.pool) {
+      return this.pool;
+    }
+
     try {
-      const con = await mysql.createConnection({
+      this.pool = await mysql.createPool({
         host: this.HOST,
         user: this.USER,
         password: this.PASSWORD,
         database: this.DATABASE
       });
-      return con;
+      return this.pool;
     } catch (e: unknown) {
       return undefined;
     }
@@ -188,15 +194,17 @@ export class RelationalDb implements IDatabase {
    * @returns true if a connection to a Db is possible, false if not
    */
   isDBReady = async () => {
-    const con = await this.connect();
-    if (con == undefined) {
+    const pool = await this.connect();
+    if (pool == undefined) {
       console.log("Failed to create connection to db");
       return false;
     }
     
     try {
+      const con = await pool.getConnection();
       await con.connect();
       console.log("connection successful");
+      con.destroy();
       return true;
     } catch (e: unknown) {
       console.log("connection to db failed");
