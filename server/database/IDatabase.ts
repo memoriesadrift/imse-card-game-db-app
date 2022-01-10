@@ -6,6 +6,5 @@ export interface IDatabase {
   populateDB(): Promise<boolean>;
 
   getCardGames(): Promise<Array<CardGame> | undefined>;
-
-
+  getCardGame(id: number): Promise<CardGame | undefined>; 
 }

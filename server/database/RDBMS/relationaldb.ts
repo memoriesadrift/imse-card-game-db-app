@@ -291,4 +291,61 @@ export class RelationalDb implements IDatabase {
     return cardGameObjs;
   }
 
+  async getCardGame(id: number): Promise<CardGame | undefined>  {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return undefined;
+    }
+
+    const cardGamesRes = await con.query(`SELECT OneCardGame.ID AS CardGameID,
+     OneCardGame.Name AS CardGameName,
+     Description, CardTypeID,
+     CardType.ID AS CardTypeID,
+     CardType.Name AS CardTypeName,
+     VerifiedCardGame.ID AS VerifiedCardGameID,
+     Comment, CreationTimestamp, VerifiedBy,
+     WikipediaLink 
+     FROM (SELECT * FROM CardGame WHERE ID = ?) AS OneCardGame 
+     LEFT JOIN CardType ON OneCardGame.CardTypeID = CardType.ID
+     LEFT JOIN VerifiedCardGame ON OneCardGame.ID = VerifiedCardGame.ID`, [id]);
+
+    const cardGame = (cardGamesRes[0] as mysql.RowDataPacket[])[0];
+    if (!cardGame) {
+      return undefined;
+    }
+
+    let cardGameObj:CardGame = {} as CardGame;
+    cardGameObj.id = cardGame.CardGameID;
+    cardGameObj.name = cardGame.CardGameName;
+    cardGameObj.cardType = {
+      id: cardGame.CardTypeID,
+      name: cardGame.CardTypeName,
+      wikipediaLink: cardGame.WikipediaLink
+    };
+
+    const reviewsRes = await con.query('SELECT * FROM Review WHERE CardGameID = ?', [cardGame.CardGameID]);
+    const reviews = (reviewsRes[0] as mysql.RowDataPacket[]);
+    
+    cardGameObj.reviews = reviews.map((review):Review => {
+      return {
+        id: review.ID, 
+        text: review.ReviewText, 
+        rating: review.Rating,
+        timestamp: review.CreationTimestamp,
+        leftByUser: review.LeftBy
+      }
+    });
+
+    if (cardGame.VerifiedCardGameID != null) {
+      cardGameObj.verification = {
+        comment: cardGame.Comment,
+        timestamp: cardGame.CreationTimestamp,
+        verifiedByAdmin: cardGame.VerifiedBy
+      };
+    }
+
+    return cardGameObj;
+  }
+
 }
