@@ -1,4 +1,4 @@
-export type URL = string & {__type: 'URL'}
+export type WebLink = string & {__type: 'URL'}
 
 export type Verification = {
     comment: string,
@@ -17,7 +17,7 @@ export type Review = {
 export type CardType = {
     id: number,
     name: string,
-    wikipediaLink: URL,
+    wikipediaLink: WebLink,
 }
 
 export type CardGame = {

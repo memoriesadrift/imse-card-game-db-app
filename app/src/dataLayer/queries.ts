@@ -1,5 +1,5 @@
 import { useQuery } from "react-query"
-import { CardGame, CardType, Review, URL, Verification } from "../types"
+import { CardGame, CardType } from "../types"
 import { baseUri } from "./constants"
 import { parseCardGame } from "./utils"
 

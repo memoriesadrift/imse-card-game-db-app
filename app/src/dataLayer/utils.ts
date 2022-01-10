@@ -1,4 +1,4 @@
-import { CardType, Review, URL, Verification } from "../types"
+import { CardType, Review, WebLink, Verification } from "../types"
 
 export const parseCardGame = (json: any) =>  {
     const baseObj = {
@@ -11,7 +11,7 @@ export const parseCardGame = (json: any) =>  {
         cardType: {
             name: json.cardType.name,
             id: json.cardType.id,
-            wikipediaLink: json.cardType.wikipediaLink as URL,
+            wikipediaLink: json.cardType.wikipediaLink as WebLink,
         }
     }
 
