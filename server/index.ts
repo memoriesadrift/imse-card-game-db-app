@@ -1,12 +1,14 @@
 // TODO: Upgrade to TS
-const express = require('express')
-const Joi = require('joi')
+import express, { json } from 'express';
 const app = express()
-const mysql = require('mysql2')
+import {RelationalDb} from "./database/RDBMS/relationaldb.js";
 
 const port = 8080
 
-app.use(express.json()) // enable JSON parsing in request body, for POST requests
+app.use(json()) // enable JSON parsing in request body, for POST requests
+
+const database = new RelationalDb();
+
 
 let testGames = [
   {
@@ -72,11 +74,6 @@ let testGames = [
   },
 ]
 
-// TODO: Extract validation logic
-const gameSchema = Joi.object({
-  name: Joi.string().max(20).required(),
-  description: Joi.string().min(1),
-})
 
 // Set headers for each request
 app.use((req, res, next) => {
@@ -91,6 +88,15 @@ app.get('/api/strategy', (_req, res) => {
   res.send('none')
 })
 
+// generate db entries
+app.get('/api/populate', async (_req, res) => {
+  if (await database.populateDB()) {
+    res.status(200).send({"success": true});
+  } else {
+    res.status(500).send({"success": false});
+  }
+});
+
 // List games
 app.get('/api/games', (_req, res) => {
   res.send(testGames)
@@ -98,7 +104,6 @@ app.get('/api/games', (_req, res) => {
 
 // Add game
 app.post('/api/games', (req, res) => {
-  const {error, value} = gameSchema.validate(req.body)
 
   const newGame = {
     id: testGames.length + 1,
@@ -106,13 +111,7 @@ app.post('/api/games', (req, res) => {
     description: req.body.description || 'No description.',
     reviews: [],
   }
-
-  if (value) {
-    testGames.push(newGame)
-    res.send(newGame)
-  } else {
-    res.status(400).send(error)
-  }
+  res.send(newGame)
 })
 
 // Update Game
@@ -123,14 +122,6 @@ app.put('/api/games/:id', (req, res) => {
 
   if (!game) {
     res.status(404).send('The game with the given ID could not be found.')
-    return
-  }
-
-  // Validate
-  const {error} = gameSchema.validate(req.body)
-
-  if (error) {
-    res.status(400).send(error)
     return
   }
 
@@ -152,29 +143,12 @@ app.get('/api/games/:id', (req, res) => {
 })
 
 // test if db works
-app.get('/db', (req, res) => {
-  
-  var con = mysql.createConnection({
-    host: "ise-mysql",
-    user: "ise-editor",
-    password: "ise-password",
-    database: "card-game"
-  });
-
-  con.connect(function(err) {
-    if (err) { 
-      res.send("DB connection failed");
-      console.log(err);
-    }
-    else {
-      con.query("SHOW tables", function(err, tables) {
-        res.send(tables);
-        //res.send("Connected! <br>" + tables.toString());
-      });
-    }
-  });
-
-})
-
+app.get('/db', async (req, res) => {
+  if (await database.isDBReady()) {
+    res.status(200).send("Connected!");
+  } else {
+    res.status(500).send("DB connection failed");
+  }
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}...`))

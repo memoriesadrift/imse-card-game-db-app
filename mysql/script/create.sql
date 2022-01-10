@@ -41,34 +41,37 @@ DELIMETER ;
 
 CREATE TABLE CardGame (
   ID INTEGER AUTO_INCREMENT,
-  Name VARCHAR(32), -- assumption
-  Description VARCHAR(1000), -- assumption
+  Name NVARCHAR(50), -- assumption; NVARCHAR for unicode
+  Description TEXT, -- assumption
   CardTypeID INTEGER,
 
   PRIMARY KEY (ID),
-  FOREIGN KEY (CardTypeID) REFERENCES CardType(ID)
+  FOREIGN KEY (CardTypeID) REFERENCES CardType(ID) ON DELETE CASCADE
 );
 
 
 CREATE TABLE VerifiedCardGame (
   ID INTEGER,
   Comment VARCHAR(280),
-  CreationTimestamp TIMESTAMP,
+  CreationTimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   VerifiedBy VARCHAR(18), -- tweet length
 
   PRIMARY KEY (ID),
-  FOREIGN KEY (VerifiedBy) REFERENCES Admin(Username)
+  FOREIGN KEY (ID) REFERENCES CardGame(ID) ON DELETE CASCADE,
+  FOREIGN KEY (VerifiedBy) REFERENCES Admin(Username) ON DELETE SET NULL
 );
 
 CREATE TABLE Review (
   ID INTEGER AUTO_INCREMENT,
   CardGameID INTEGER,
+  LeftBy VARCHAR(18),
   ReviewText VARCHAR(280), -- tweet length
   Rating TINYINT,
-  CreationTimestamp TIMESTAMP,
+  CreationTimestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (ID, CardGameID),
-  FOREIGN KEY (CardGameID) REFERENCES CardGame(ID)
+  FOREIGN KEY (CardGameID) REFERENCES CardGame(ID) ON DELETE CASCADE,
+  FOREIGN KEY (LeftBy) REFERENCES User(Username) ON DELETE SET NULL
 );
 
 CREATE TABLE favorites (
@@ -76,8 +79,8 @@ CREATE TABLE favorites (
   CardGameID INTEGER,
 
   PRIMARY KEY (UserID, CardGameID),
-  FOREIGN KEY (UserID) REFERENCES User(Username),
-  FOREIGN KEY (CardGameID) REFERENCES CardGame(ID)
+  FOREIGN KEY (UserID) REFERENCES User(Username) ON DELETE CASCADE,
+  FOREIGN KEY (CardGameID) REFERENCES CardGame(ID) ON DELETE CASCADE
 );
 
 

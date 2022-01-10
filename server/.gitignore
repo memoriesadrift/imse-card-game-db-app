@@ -1,2 +1,6 @@
 # Node modules
 /node_modules
+
+# ignore copyrighted data
+/data/cardGames.json
+/data/cardTypes.json
