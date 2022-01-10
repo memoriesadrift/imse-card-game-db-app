@@ -98,9 +98,25 @@ app.get('/api/populate', async (_req, res) => {
 });
 
 // List games
-app.get('/api/games', (_req, res) => {
-  res.send(testGames)
+app.get('/api/games', async (_req, res) => {
+  const cardGames = await database.getCardGames();
+  
+  if (!cardGames) {
+    res.status(500).send({});
+  } else {
+    res.status(200).send(cardGames);
+  }
 })
+
+// Get single game
+app.get('/api/games/:id', async (req, res) => {
+  const cardGame = await database.getCardGame(parseInt(req.params.id));
+  if (!cardGame) {
+    res.status(500).send({});
+  } else {
+    res.status(200).send(cardGame);
+  }
+});
 
 // Add game
 app.post('/api/games', (req, res) => {
@@ -133,14 +149,7 @@ app.put('/api/games/:id', (req, res) => {
   res.send(newGame)
 })
 
-// Get single game
-app.get('/api/games/:id', (req, res) => {
-  // TODO: validate input properly
-  const id = parseInt(req.params.id)
-  const game = testGames.find((game) => game.id === id)
 
-  res.status(game ? 200 : 404).send(game || 'The game with the given ID could not be found.')
-})
 
 // test if db works
 app.get('/db', async (req, res) => {
