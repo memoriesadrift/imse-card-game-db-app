@@ -21,7 +21,7 @@ export type CardType = {
 }
 
 export type CardGame = {
-  id: number,
+  id?: number,
   name: string,
   cardType: CardType,
   description: string,
