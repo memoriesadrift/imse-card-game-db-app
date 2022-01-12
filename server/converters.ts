@@ -17,11 +17,7 @@ export function convertCardType(data:any):CardType|undefined {
     return undefined;
   }
 
-  return {
-    id: id,
-    name: name,
-    wikipediaLink: wikipediaLink
-  };
+  return {...{id, name, wikipediaLink}};
 }
 
 export function convertCardGame(data:any):CardGame|undefined {
@@ -40,12 +36,6 @@ export function convertCardGame(data:any):CardGame|undefined {
     return undefined;
   }
 
-
-  return {
-    name: name,
-    cardType: cardType,
-    description: description,
-    reviews: []
-  };
+  return {...{name, cardType, description}, reviews: []};
 }
 
