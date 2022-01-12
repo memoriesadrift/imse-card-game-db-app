@@ -1,6 +1,7 @@
 import { Console } from 'console';
 import fs, { truncate } from 'fs';
 import mysql from 'mysql2/promise';
+import { TransformStreamDefaultController } from 'stream/web';
 import { CardGame, Review, CardType, Verification, ReportOne, ReportTwo } from '../../types';
 import { IDatabase } from '../IDatabase'
 
@@ -405,6 +406,23 @@ export class RelationalDb implements IDatabase {
     const cardTypesRes = (queryRes[0] as mysql.RowDataPacket[]);
 
     return cardTypesRes.map(data => this.extractCardType(data));
+  }
+
+  async updateCardGame(cardGame: CardGame): Promise<boolean> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return false;
+    }
+
+    try {
+      await con.query('UPDATE CardGame SET Name = ?, Description = ?, CardTypeId = ? WHERE ID=?', [cardGame.name, cardGame.description, cardGame.cardType.id, cardGame.id]);
+    } catch (e: unknown) {
+      console.log("Updating card game failed");
+      return false;
+    }
+
+    return true;
   }
 
   private reportOneQuery = `SELECT CardType.Name AS CardTypeName, COUNT(RecentReview.ID) as ReviewCount FROM 

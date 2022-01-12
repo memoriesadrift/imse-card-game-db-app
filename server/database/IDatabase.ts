@@ -11,6 +11,8 @@ export interface IDatabase {
   getReportOne():Promise<Array<ReportOne> | undefined>;
   getReportTwo():Promise<Array<ReportTwo> | undefined>;
   
+  updateCardGame(cardGame: CardGame): Promise<boolean>;
+
   insertCardGame(cardGame: CardGame): Promise<boolean>;
   insertReview(cardGameId:number, review:Review): Promise<boolean>;
 }

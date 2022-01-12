@@ -24,6 +24,7 @@ export function convertCardGame(data:any):CardGame|undefined {
   const nameRaw:string|undefined = data.name;
   const descriptionRaw:string|undefined = data.description;
   const cardType = convertCardType(data.cardType)
+  const id:number|undefined = data.id;
 
   if (!nameRaw || !descriptionRaw || !cardType) {
     return undefined;
@@ -36,7 +37,7 @@ export function convertCardGame(data:any):CardGame|undefined {
     return undefined;
   }
 
-  return {...{name, cardType, description}, reviews: []};
+  return {...{id, name, cardType, description}, reviews: []};
 }
 
 export function convertReview(data:any):Review|undefined {
