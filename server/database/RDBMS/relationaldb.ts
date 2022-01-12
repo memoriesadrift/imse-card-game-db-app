@@ -407,20 +407,20 @@ export class RelationalDb implements IDatabase {
     return cardTypesRes.map(data => this.extractCardType(data));
   }
 
-  private test = `SELECT CardType.Name AS CardTypeName, COUNT(Review.ID) as ReviewCound FROM
-  CardGame
-  LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
-  CROSS JOIN Review ON Review.CardGameID = CardGame.ID
-  GROUP BY CardType.Name
-  HAVING Review.CreationTimestamp < (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 day)))
-  ORDER BY COUNT(Review.ID)`;
+  private test = `SELECT CardType.Name AS CardTypeName, COUNT(RecentReview.ID) as ReviewCount FROM 
+    CardGame
+    LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
+    CROSS JOIN (SELECT * FROM Review
+      WHERE Review.CreationTimestamp > (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 day))))
+      AS RecentReview ON RecentReview.CardGameID = CardGame.ID 
+    GROUP BY CardType.Name ORDER BY COUNT(Review.ID) DESC;`;
 
-  private test2 = `SELECT CardGame.Name AS CardGameName, COUNT(Teens.ID) as UserCount
-  VerifiedCardGame
-  LEFT JOIN CardGame ON VerifiedCardGame.ID = CardGame.ID
-  LEFT JOIN favorites ON CardGame.ID = favorites.CardGameID
-  LEFT JOIN (SELECT * FROM User WHERE User.Birthday < (SELECT DATE(DATE_SUB(NOW(), INTERVAL 18 years))))
-    AND User.Birthday > < (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 13 years)))) AS Teens ON Teens.Username = favorites.UserID
-  GROUP BY CardGame.Name
-  ORDER BY COUNT(Teens.ID)`
+  private test2 = `SELECT CardGame.Name AS CardGameName, COUNT(Teens.Username) as UserCount FROM
+    VerifiedCardGame
+    LEFT JOIN CardGame ON VerifiedCardGame.ID=CardGame.ID
+    LEFT JOIN favorites ON CardGame.ID = favorites.CardGameID
+    CROSS JOIN (SELECT * FROM User WHERE User.Birthday > (SELECT DATE(DATE_SUB(NOW(), INTERVAL 18 year)))
+      AND User.Birthday < (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 13 year)))) AS Teens ON Teens.Username = favorites.UserID
+    GROUP BY CardGame.Name ORDER BY COUNT(Teens.Username) DESC;`
+
 }
