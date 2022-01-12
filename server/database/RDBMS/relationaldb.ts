@@ -328,4 +328,45 @@ export class RelationalDb implements IDatabase {
     return this.extractCardGame(cardGame, reviews);;
   }
 
+  private async isCardTypeSaved(cardType:CardType):Promise<boolean> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return false;
+    }
+
+    const queryRes = await con.query('SELECT * FROM CardType WHERE ID=?', [cardType.id]);
+    const cardTypeQueried = (queryRes[0] as mysql.RowDataPacket[])[0];
+    
+    if (!cardTypeQueried) {
+      console.log("the passed CardType ID did not match any ID saved in the DB");
+      return false;
+    }
+    return true;
+  }
+
+
+  async insertCardGame(cardGame:CardGame):Promise<boolean> {
+
+    if (!this.isCardTypeSaved(cardGame.cardType)) {
+      return false;
+    }
+
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return false;
+    }
+
+    try {
+      await con.query('INSERT INTO CardGame(Name, Description, CardTypeId) VALUES (?, ?, ?)', [cardGame.name, cardGame.description, cardGame.cardType.id]);
+    } catch (e: unknown) {
+      console.log("Inserting the CardGame failed");
+      return false;
+    }
+    
+    return true;
+
+  }
+
 }
