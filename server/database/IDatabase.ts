@@ -1,4 +1,4 @@
-import { CardGame } from "../types";
+import { CardGame, CardType } from "../types";
 
 export interface IDatabase {
 
@@ -7,4 +7,5 @@ export interface IDatabase {
 
   getCardGames(): Promise<Array<CardGame> | undefined>;
   getCardGame(id: number): Promise<CardGame | undefined>; 
+  getCardTypes(): Promise<Array<CardType> | undefined>;
 }
