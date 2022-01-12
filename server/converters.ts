@@ -1,5 +1,5 @@
 
-import { URL, CardGame, CardType } from "./types";
+import { URL, CardGame, CardType, Review } from "./types";
 
 
 export function convertCardType(data:any):CardType|undefined {
@@ -39,3 +39,21 @@ export function convertCardGame(data:any):CardGame|undefined {
   return {...{name, cardType, description}, reviews: []};
 }
 
+export function convertReview(data:any):Review|undefined {
+  const textRaw:string|undefined = data.text;
+  const rating:number|undefined = data.rating;
+  const leftByUserRaw:string|undefined = data.leftByUser;
+
+  if (!textRaw || !rating || !leftByUserRaw) {
+    return undefined;
+  }
+
+  const text = textRaw.trim();
+  const leftByUser = leftByUserRaw.trim();
+  
+  if (text.length === 0 || leftByUserRaw.length === 0 || rating < 0 || rating > 10) {
+    return undefined;
+  }
+
+  return {...{text, rating, leftByUser}};
+}
