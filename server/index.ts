@@ -190,6 +190,29 @@ app.post('/api/games/review/:id', async (req, res) => {
   console.log("Insertin review successful");
   res.status(200).send({"success":true});
 });
+  
+
+app.get('/api/reports/1', async (req, res) => {
+  const reportOne = await database.getReportOne();
+
+  if (!reportOne) {
+    res.status(500).send({"success":false});
+    return;
+  }
+
+  res.status(200).send(reportOne);
+});
+
+app.get('/api/reports/2', async (req, res) => {
+  const reportTwo = await database.getReportTwo();
+
+  if (!reportTwo) {
+    res.status(500).send({"success":false});
+    return;
+  }
+  
+  res.status(200).send(reportTwo);
+});
 
 // test if db works
 app.get('/db', async (req, res) => {
