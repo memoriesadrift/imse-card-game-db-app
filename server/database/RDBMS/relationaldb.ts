@@ -368,7 +368,7 @@ export class RelationalDb implements IDatabase {
     return true;
 
   }
-
+  
   async insertReview(cardGameId: number, review: Review): Promise<boolean> {
     const con = await this.connect();
     if (!con) {
@@ -384,6 +384,27 @@ export class RelationalDb implements IDatabase {
     }
 
     return true;
+  }
+
+  private extractCardType(data: mysql.RowDataPacket):CardType {
+    return {
+      id: data.ID,
+      name: data.Name,
+      wikipediaLink: data.WikipediaLink
+    };
+  }
+
+  async getCardTypes(): Promise<CardType[] | undefined> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return undefined;
+    }
+
+    const queryRes = await con.query('SELECT * FROM CardType');
+    const cardTypesRes = (queryRes[0] as mysql.RowDataPacket[]);
+
+    return cardTypesRes.map(data => this.extractCardType(data));
   }
 
 }
