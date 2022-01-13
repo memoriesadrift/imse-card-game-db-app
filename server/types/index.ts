@@ -38,3 +38,7 @@ export type ReportTwo = {
   cardGameName: string,
   userCount: number
 }
+
+export type User = {
+  username: string // we do not need more than this for our usecase
+}

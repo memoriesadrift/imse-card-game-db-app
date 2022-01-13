@@ -153,6 +153,17 @@ app.get('/api/reports/2', async (req, res) => {
   res.status(200).send(reportTwo);
 });
 
+// Get Users
+app.get('/api/users', async (req, res) => {
+  const users = await database.getUsers();
+
+  if(!users){
+    res.status(500).send({"success":false});
+  }
+
+  res.status(200).send(users);
+});
+
 // test if db works
 app.get('/db', async (req, res) => {
   const databaseReady = await database.isDBReady();
