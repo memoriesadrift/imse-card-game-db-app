@@ -26,7 +26,10 @@ app.get('/api/strategy', (_req, res) => {
 
 // generate db entries
 app.get('/api/populate', async (_req, res) => {
-  if (await database.populateDB()) {
+
+  const populateSuccessful = await database.populateDB();
+
+  if (populateSuccessful) {
     res.status(200).send({"success": true});
   } else {
     res.status(500).send({"success": false});
@@ -85,7 +88,8 @@ app.put('/api/games/:id', async (req, res) => {
     return;
   }
 
-  if (!await database.updateCardGame(cardGame)) {
+  const updateSuccessful = await database.updateCardGame(cardGame);
+  if (!updateSuccessful) {
     res.status(422).send('Updating card game failed');
     return;
   }
@@ -151,7 +155,8 @@ app.get('/api/reports/2', async (req, res) => {
 
 // test if db works
 app.get('/db', async (req, res) => {
-  if (await database.isDBReady()) {
+  const databaseReady = await database.isDBReady();
+  if (databaseReady) {
     res.status(200).send("Connected!");
   } else {
     res.status(500).send("DB connection failed");

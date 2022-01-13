@@ -481,8 +481,4 @@ export class RelationalDb implements IDatabase {
     return reportTwoRaw.map((data) => this.extractReportTwo(data));
   }
 
-  
-
-  
-
 }
