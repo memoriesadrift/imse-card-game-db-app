@@ -7,10 +7,10 @@ export type Verification = {
 }
 
 export type Review = {
-  id: number,
+  id?: number,
   text: string,
   rating: number,
-  timestamp: number,
+  timestamp?: number,
   leftByUser: string,
 }
 

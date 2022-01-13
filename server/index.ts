@@ -1,6 +1,6 @@
 // TODO: Upgrade to TS
 import express, { json } from 'express';
-import { convertCardGame } from './converters.js';
+import { convertCardGame, convertReview } from './converters.js';
 const app = express()
 import {RelationalDb} from "./database/RDBMS/relationaldb.js";
 
@@ -170,6 +170,26 @@ app.get('/api/cardtypes', async (_req, res) => {
 });
 
 
+// POST review
+app.post('/api/games/review/:id', async (req, res) => {
+  const id = parseInt(req.params.id)
+
+  const review = convertReview(req.body.review);
+  if (!review) {
+    console.log("Converting review failed!");
+    res.status(422).send({"success":false});
+    return;
+  }
+
+  if (!await database.insertReview(id, review)) {
+    console.log("Inserting review failed");
+    res.status(422).send({"success":false});
+    return;
+  }
+
+  console.log("Insertin review successful");
+  res.status(200).send({"success":true});
+});
 
 // test if db works
 app.get('/db', async (req, res) => {

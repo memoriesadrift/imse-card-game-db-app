@@ -368,6 +368,23 @@ export class RelationalDb implements IDatabase {
     return true;
 
   }
+  
+  async insertReview(cardGameId: number, review: Review): Promise<boolean> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return false;
+    }
+
+    try {
+      await con.query('INSERT INTO Review(CardGameID, LeftBy, ReviewText, Rating) VALUES (?, ?, ?, ?)', [cardGameId, review.leftByUser, review.text, review.rating]);
+    } catch (e: unknown) {
+      console.log("Inserting new Review failed");
+      return false;
+    }
+
+    return true;
+  }
 
   private extractCardType(data: mysql.RowDataPacket):CardType {
     return {
