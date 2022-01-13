@@ -11,71 +11,6 @@ app.use(json()) // enable JSON parsing in request body, for POST requests
 const database = new RelationalDb();
 
 
-let testGames = [
-  {
-    id: 1,
-    name: 'Joker',
-    description: 'A fun party game.',
-    cardType: {
-      id: 1,
-      name: 'French-suited playing cards',
-      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards',
-    },
-    reviews: [
-      {
-        id: 1,
-        text: 'I love how simple, yet complex this game is.',
-        rating: 10,
-        timestamp: 1387430922,
-        leftByUser: 'johnny101',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Poker',
-    description: 'A casino favourite.',
-    cardType: {
-      id: 1,
-      name: 'French-suited playing cards',
-      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards',
-    },
-    verification: {
-      comment: 'Classic. Approved.',
-      timestamp: 1387430022,
-      verifiedByAdmin: 'admin',
-    },
-    reviews: [
-      {
-        id: 1,
-        text: 'I love all the layers this game has. Thrilling!',
-        rating: 10,
-        timestamp: 1420476577,
-        leftByUser: 'angela1512',
-      },
-      {
-        id: 2,
-        text: 'You will be able to focus consistently, as long as you maintain placidity.',
-        rating: 10,
-        timestamp: 1387496002,
-        leftByUser: 'seth9u52',
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Texas Hold \'em Poker',
-    description: 'A spin on a casion classic.',
-    cardType: {
-      id: 1,
-      name: 'French-suited playing cards',
-      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards',
-    },
-    reviews: [],
-  },
-]
-
-
 // Set headers for each request
 app.use((req, res, next) => {
   // Allow requests from client
@@ -91,7 +26,10 @@ app.get('/api/strategy', (_req, res) => {
 
 // generate db entries
 app.get('/api/populate', async (_req, res) => {
-  if (await database.populateDB()) {
+
+  const populateSuccessful = await database.populateDB();
+
+  if (populateSuccessful) {
     res.status(200).send({"success": true});
   } else {
     res.status(500).send({"success": false});
@@ -140,22 +78,23 @@ app.post('/api/games', async (req, res) => {
 })
 
 // Update Game
-app.put('/api/games/:id', (req, res) => {
-  // Lookup
-  const id = parseInt(req.params.id)
-  const game = testGames.find((game) => game.id === id)
+app.put('/api/games/:id', async (req, res) => {
 
-  if (!game) {
-    res.status(404).send('The game with the given ID could not be found.')
-    return
+  const id = parseInt(req.params.id)
+  const cardGame = convertCardGame(req.body.cardGame);
+
+  if (!cardGame || !cardGame.id) {
+    res.status(422).send('Could not interpret body.');
+    return;
   }
 
-  // Update
-  const newGame = {...game, name: req.body.name, description: req.body.description}
-  testGames = testGames.filter((game) => game.id !== id)
-  testGames.push(newGame)
+  const updateSuccessful = await database.updateCardGame(cardGame);
+  if (!updateSuccessful) {
+    res.status(422).send('Updating card game failed');
+    return;
+  }
 
-  res.send(newGame)
+  res.status(200).send('Successful!');
 })
 
 // Get card types
@@ -190,10 +129,34 @@ app.post('/api/games/review/:id', async (req, res) => {
   console.log("Insertin review successful");
   res.status(200).send({"success":true});
 });
+  
+
+app.get('/api/reports/1', async (req, res) => {
+  const reportOne = await database.getReportOne();
+
+  if (!reportOne) {
+    res.status(500).send({"success":false});
+    return;
+  }
+
+  res.status(200).send(reportOne);
+});
+
+app.get('/api/reports/2', async (req, res) => {
+  const reportTwo = await database.getReportTwo();
+
+  if (!reportTwo) {
+    res.status(500).send({"success":false});
+    return;
+  }
+  
+  res.status(200).send(reportTwo);
+});
 
 // test if db works
 app.get('/db', async (req, res) => {
-  if (await database.isDBReady()) {
+  const databaseReady = await database.isDBReady();
+  if (databaseReady) {
     res.status(200).send("Connected!");
   } else {
     res.status(500).send("DB connection failed");

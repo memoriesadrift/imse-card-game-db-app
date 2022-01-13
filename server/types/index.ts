@@ -28,3 +28,13 @@ export type CardGame = {
   reviews: Array<Review>,
   verification?: Verification,
 }
+
+export type ReportOne = {
+  cardTypeName: string,
+  reviewCount: number
+}
+
+export type ReportTwo = {
+  cardGameName: string,
+  userCount: number
+}

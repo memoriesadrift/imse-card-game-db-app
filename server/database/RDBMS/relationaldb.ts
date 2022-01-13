@@ -1,7 +1,8 @@
 import { Console } from 'console';
 import fs, { truncate } from 'fs';
 import mysql from 'mysql2/promise';
-import { CardGame, Review, CardType, Verification } from '../../types';
+import { TransformStreamDefaultController } from 'stream/web';
+import { CardGame, Review, CardType, Verification, ReportOne, ReportTwo } from '../../types';
 import { IDatabase } from '../IDatabase'
 
 export class RelationalDb implements IDatabase {
@@ -405,6 +406,79 @@ export class RelationalDb implements IDatabase {
     const cardTypesRes = (queryRes[0] as mysql.RowDataPacket[]);
 
     return cardTypesRes.map(data => this.extractCardType(data));
+  }
+
+  async updateCardGame(cardGame: CardGame): Promise<boolean> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return false;
+    }
+
+    try {
+      await con.query('UPDATE CardGame SET Name = ?, Description = ?, CardTypeId = ? WHERE ID=?', [cardGame.name, cardGame.description, cardGame.cardType.id, cardGame.id]);
+    } catch (e: unknown) {
+      console.log("Updating card game failed");
+      return false;
+    }
+
+    return true;
+  }
+
+  private reportOneQuery = `SELECT CardType.Name AS CardTypeName, COUNT(RecentReview.ID) as ReviewCount FROM 
+    CardGame
+    LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
+    CROSS JOIN (SELECT * FROM Review
+      WHERE Review.CreationTimestamp > (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 day))))
+      AS RecentReview ON RecentReview.CardGameID = CardGame.ID 
+    GROUP BY CardType.Name ORDER BY COUNT(Review.ID) DESC;`;
+
+  private extractReportOne(data:mysql.RowDataPacket):ReportOne {
+    const cardTypeName = data.CardTypeName;
+    const reviewCount = data.ReviewCount;
+
+    return {...{cardTypeName, reviewCount}};
+  }
+
+  async getReportOne(): Promise<ReportOne[] | undefined> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return undefined;
+    }
+
+    const queryRes = await con.query(this.reportOneQuery);
+    const reportOneRaw = (queryRes[0] as mysql.RowDataPacket[]);
+
+    return reportOneRaw.map((data) => this.extractReportOne(data));
+  }
+
+  private reportTwoQuery = `SELECT CardGame.Name AS CardGameName, COUNT(Teens.Username) as UserCount FROM
+    VerifiedCardGame
+    LEFT JOIN CardGame ON VerifiedCardGame.ID=CardGame.ID
+    LEFT JOIN favorites ON CardGame.ID = favorites.CardGameID
+    CROSS JOIN (SELECT * FROM User WHERE User.Birthday > (SELECT DATE(DATE_SUB(NOW(), INTERVAL 18 year)))
+      AND User.Birthday < (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 13 year)))) AS Teens ON Teens.Username = favorites.UserID
+    GROUP BY CardGame.Name ORDER BY COUNT(Teens.Username) DESC;`
+
+  private extractReportTwo(data:mysql.RowDataPacket):ReportTwo {
+    const cardGameName = data.CardGameName;
+    const userCount = data.UserCount;
+
+    return {...{cardGameName, userCount}};
+  }
+
+  async getReportTwo(): Promise<ReportTwo[] | undefined> {
+    const con = await this.connect();
+    if (!con) {
+      console.log("Error retrieving connection!");
+      return undefined;
+    }
+
+    const queryRes = await con.query(this.reportTwoQuery);
+    const reportTwoRaw = (queryRes[0] as mysql.RowDataPacket[]);
+
+    return reportTwoRaw.map((data) => this.extractReportTwo(data));
   }
 
 }
