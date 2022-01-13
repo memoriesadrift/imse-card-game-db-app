@@ -159,7 +159,7 @@ app.put('/api/games/:id', (req, res) => {
 })
 
 // Get card types
-app.get('/api/cardtypes', async (req, res) => {
+app.get('/api/cardtypes', async (_req, res) => {
   const cardTypes = await database.getCardTypes();
   if (!cardTypes) {
     res.status(422).send({"success":false});
