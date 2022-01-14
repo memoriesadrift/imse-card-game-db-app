@@ -4,7 +4,7 @@ db.createCollection("user", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["_id", "passwordHash", "email", "birhtday", "favorites", "latestReviews"],
+      required: ["_id", "passwordHash", "email", "birhtday", "favorites", /*"latestReviews"*/],
       properties: {
         _id: {
           bsonType: "string",
@@ -28,7 +28,7 @@ db.createCollection("user", {
             bsonType: "objectId",
             description: "the id of the favorited card game"
           }
-        },
+        }/*,
         latestReviews: {
           bsonType: "array",
           items: {
@@ -41,7 +41,7 @@ db.createCollection("user", {
               creationTimestamp: { bsonType: "timestamp" }
             }
           }
-        },
+        }*/,
         admin: {
           bsonType: "objectId",
           required: ["realName", "profileDescription"],

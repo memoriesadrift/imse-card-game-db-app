@@ -1,6 +1,7 @@
 // TODO: Upgrade to TS
 import express, { json } from 'express';
 import { convertCardGame, convertReview } from './converters.js';
+import { migrateDatabase } from './database/databaseMigrate.js';
 const app = express()
 import {RelationalDb} from "./database/RDBMS/relationaldb.js";
 
@@ -34,6 +35,11 @@ app.get('/api/populate', async (_req, res) => {
   } else {
     res.status(500).send({"success": false});
   }
+});
+
+app.get('/api/migrate', async (_req, res) => {
+  await migrateDatabase();
+  res.status(200).send(":)");
 });
 
 // List games
@@ -155,7 +161,7 @@ app.get('/api/reports/2', async (req, res) => {
 
 // Get Users
 app.get('/api/users', async (req, res) => {
-  const users = await database.getUsers();
+  const users = await database.getUserNames();
 
   if(!users){
     res.status(500).send({"success":false});
