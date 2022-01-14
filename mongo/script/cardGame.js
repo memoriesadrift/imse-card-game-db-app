@@ -4,29 +4,32 @@ db.createCollection("cardGame", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["name", "cardType", "description"],
       properties: {
         name: {
           bsonType: "string",
-          description: "the name of the card game"
+          description: "the name of the card game",
+          required: true
         },
         cardType: {
           bsonType: "object",
-          required: ["name", "wikipediaLink"],
+          required: true,
           properties: {
             name: {
               bsonType: "string",
-              description: "the name of the card type"
+              description: "the name of the card type",
+              required: true
             },
             wikipediaLink: {
               bsonType: "string",
-              description: "the link to the wikipedia articel of the specific card type"
+              description: "the link to the wikipedia articel of the specific card type",
+              required: true
             }
           }
         },
         description: {
           bsonType: "string",
-          description: "the description of the card game"
+          description: "the description of the card game",
+          required: true
         },
         verification: {
           bsonType: "object",

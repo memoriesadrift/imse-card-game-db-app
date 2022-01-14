@@ -4,13 +4,12 @@ db.createCollection("review", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["cardGameID", "leftBy", "reviewText", "rating", "creatinTimestamp"],
       properties: {
-        cardGameID: { bsonType: "objectId" },
-        leftBy: {bsonType: "string" },
-        reviewText: { bsonType: "string" },
-        rating: { bsonType: "number" },
-        creationTimestamp: { bsonType: "timestamp" }
+        cardGameID: { bsonType: "objectId", required: true },
+        leftBy: {bsonType: "string", required: true },
+        reviewText: { bsonType: "string", required: true },
+        rating: { bsonType: "number", required: true },
+        creationTimestamp: { bsonType: "timestamp", required: true }
       }
     }
   }

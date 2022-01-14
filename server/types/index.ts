@@ -1,10 +1,10 @@
-import { ObjectId } from "mongodb"
+import { ObjectId, Timestamp } from "mongodb"
 
 export type URL = string & {__type: 'URL'}
 
 export type Verification = {
   comment: string,
-  timestamp: number,
+  timestamp: Timestamp,
   verifiedByAdmin: string,
 }
 

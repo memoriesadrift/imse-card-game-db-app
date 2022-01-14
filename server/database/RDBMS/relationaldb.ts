@@ -502,7 +502,7 @@ export class RelationalDb implements IDatabase {
     };
   }
 
-  async getUserNames() {
+  async getUserNames(): Promise<any[] | undefined> {
     const con = await this.connect();
     if (!con) {
       console.log("Error retrieving connection!");

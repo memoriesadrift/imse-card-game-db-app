@@ -4,26 +4,30 @@ db.createCollection("user", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["_id", "passwordHash", "email", "birhtday", "favorites", /*"latestReviews"*/],
       properties: {
-        _id: {
+        username: {
           bsonType: "string",
-          description: "the username of the user"
+          description: "the username of the user",
+          required: true
         },
         passwordHash: {
           bsonType: "string",
-          description: "hashed and salted password"
+          description: "hashed and salted password",
+          required: true
         },
         email: {
           bsonType: "string",
-          description: "email of the user"
+          description: "email of the user",
+          required: true
         },
         birthday: {
           bsonType: "date",
-          description: "the date the user was born"
+          description: "the date the user was born",
+          required: true
         },
         favorites: {
           bsonType: "array",
+          required: true,
           items: {
             bsonType: "objectId",
             description: "the id of the favorited card game"
@@ -31,6 +35,7 @@ db.createCollection("user", {
         }/*,
         latestReviews: {
           bsonType: "array",
+          required: true,
           items: {
             bsonType: "object",
             required: ["cardGameID", "reviewText", "rating", "creatinTimestamp"],
@@ -64,3 +69,5 @@ db.createCollection("user", {
     }
   }
 });
+
+db.user.createIndex({"username":1}, {unique:true});

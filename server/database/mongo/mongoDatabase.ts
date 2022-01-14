@@ -1,7 +1,6 @@
 import { CardGame, CardType, User, ReportOne, ReportTwo, Review } from "../../types";
 import { IDatabase } from "../IDatabase";
 import { Document, MongoClient, ObjectId, OptionalId } from 'mongodb';
-import { number } from "joi";
 
 export class MongoDatabase implements IDatabase {
 
@@ -30,6 +29,44 @@ export class MongoDatabase implements IDatabase {
       console.log("Something went wrong when inserting card types into mongo!");
       return false;
     }
+
+    await this.client.close();
+    return true;
+  }
+
+  async insertCardGames(cardGames: CardGame[]):Promise<boolean> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return false;
+    }
+
+
+    const mongoList = cardGames.map(cardGame => {
+      const verification = !cardGame.verification ? undefined : {
+        comment: cardGame.verification.comment,
+        timestamp: cardGame.verification.timestamp,
+        verifiedByAdmin: cardGame.verification.verifiedByAdmin
+      };
+      return {
+        name: cardGame.name,
+        cardType: {
+          name: cardGame.cardType.name,
+          wikipediaLink: cardGame.cardType.wikipediaLink
+        },
+        description: cardGame.description,
+        verification: verification
+      }
+    });
+
+    const result =  await this.client.db(this.database).collection('cardGame').insertMany(mongoList);
+
+    if(!result.acknowledged) {
+      console.log("Something went wrong when inserting card types into mongo!");
+      return false;
+    }
+
 
     await this.client.close();
     return true;
@@ -93,15 +130,15 @@ export class MongoDatabase implements IDatabase {
     }
 
     const mongoList = users.map(user => {
-      const doc:OptionalId<Document> = {
-        _id: user.username, // why is this not working :(
+      return {
+        username: user.username,
         passwordHash: user.passwordHash,
         email: user.email,
         birthday: user.birthday,
         favorites: this.extractFavorites(user.favorites)
       }
-      return doc;
     });
+    console.log(mongoList);
 
     const result =  await this.client.db(this.database).collection('user').insertMany(mongoList);
 
