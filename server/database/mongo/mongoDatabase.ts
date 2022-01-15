@@ -42,13 +42,32 @@ export class MongoDatabase implements IDatabase {
 
     const result =  await this.client.db(this.database).collection('cardType').insertMany(mongoListings);
 
+    await this.client.close();
+
     if(!result.acknowledged) {
       console.log("Something went wrong when inserting card types into mongo!");
       return false;
     }
 
-    await this.client.close();
     return true;
+  }
+
+  private extractCardGame(cardGame: CardGame, id?: ObjectId | undefined) {
+    const verification = !cardGame.verification ? undefined : {
+      comment: cardGame.verification.comment,
+      timestamp: cardGame.verification.timestamp,
+      verifiedByAdmin: cardGame.verification.verifiedByAdmin
+    };
+    return {
+      _id: id,
+      name: cardGame.name,
+      cardType: {
+        name: cardGame.cardType.name,
+        wikipediaLink: cardGame.cardType.wikipediaLink
+      },
+      description: cardGame.description,
+      verification: verification
+    }
   }
 
   async insertCardGames(cardGames: CardGame[]):Promise<boolean> {
@@ -60,33 +79,17 @@ export class MongoDatabase implements IDatabase {
     }
 
 
-    const mongoList = cardGames.map(cardGame => {
-      const verification = !cardGame.verification ? undefined : {
-        comment: cardGame.verification.comment,
-        timestamp: cardGame.verification.timestamp,
-        verifiedByAdmin: cardGame.verification.verifiedByAdmin
-      };
-      return {
-        _id: cardGame.id as ObjectId,
-        name: cardGame.name,
-        cardType: {
-          name: cardGame.cardType.name,
-          wikipediaLink: cardGame.cardType.wikipediaLink
-        },
-        description: cardGame.description,
-        verification: verification
-      }
-    });
+    const mongoList = cardGames.map(cardGame => this.extractCardGame(cardGame, cardGame.id as ObjectId));
 
     const result =  await this.client.db(this.database).collection('cardGame').insertMany(mongoList);
+
+    await this.client.close();
 
     if(!result.acknowledged) {
       console.log("Something went wrong when inserting card types into mongo!");
       return false;
     }
 
-
-    await this.client.close();
     return true;
   }
 
@@ -172,7 +175,7 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
-    this.client.close();
+    await this.client.close();
     return true;
 
   }
@@ -291,9 +294,28 @@ export class MongoDatabase implements IDatabase {
   updateCardGame(cardGame: CardGame): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
-  insertCardGame(cardGame: CardGame): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  
+  async insertCardGame(cardGame: CardGame): Promise<boolean> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return false;
+    }
+
+    const res = await this.client.db(this.database).collection('cardGame').insertOne(this.extractCardGame(cardGame));
+
+    await this.client.close();
+
+    if(!res.acknowledged) {
+      console.log("Something went wrong when inserting card types into mongo!");
+      return false;
+    }
+    
+    return true;
   }
+
+  
   insertReview(cardGameId: number, review: Review): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
