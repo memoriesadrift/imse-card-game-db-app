@@ -58,6 +58,14 @@ export async function migrateDatabase(): Promise<boolean> {
     console.log("Failed to retrieve users from rdbms");
     return false;
   }
+  
+  users.forEach(user => {
+    if (!user.favorites) {
+      return;
+    }
+    
+    user.favorites = user.favorites.map(favorite => oldToNewCardGameId[favorite as number])
+  });
 
   await mongoDb.insertUsers(users);
 
