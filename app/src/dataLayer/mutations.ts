@@ -76,6 +76,6 @@ export const useLeaveReview = () => {
             }
         ).then((res) => res.json())
         if (!response.success) throw Error('Update unsuccessful!')
-        return response.json()
+        return response
     })
 }
