@@ -15,8 +15,10 @@ const database = new RelationalDb();
 // Set headers for each request
 app.use((req, res, next) => {
   // Allow requests from client
-  res.setHeader('Access-Control-Allow-Origin', '*')
-
+  console.log(req)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,GET,PUT,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
   next()
 })
 
@@ -66,7 +68,7 @@ app.get('/api/games/:id', async (req, res) => {
 // Add game
 app.post('/api/games', async (req, res) => {
 
-  const cardGame = convertCardGame(req.body.cardGame);
+  const cardGame = convertCardGame(req.body);
 
   if (!cardGame) {
     console.log("Converting card game failed!");

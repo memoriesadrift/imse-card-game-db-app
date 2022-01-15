@@ -6,13 +6,15 @@ import { CardGame, Review } from "../types"
 
 export const usePopulateDatabase = () => {
     return useMutation('populateDatabase', async () => {
-        fetch(`${baseUri}/populate`)
+        const res = fetch(`${baseUri}/populate`).then((response) => response.json())
+        return res
     })
 }
 
 export const useMigrateDatabase = () => {
     return useMutation('migrateDatabase', async () => {
-       fetch(`${baseUri}/migrate`)
+        const res = fetch(`${baseUri}/migrate`).then((response) => response.json())
+        return res
     })
 }
 

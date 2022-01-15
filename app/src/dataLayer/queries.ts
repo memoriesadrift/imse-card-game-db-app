@@ -22,6 +22,14 @@ export const useGetCardGame = (id: number | undefined) => {
     })
 }
 
+export const useGetCardTypes = () => {
+    return useQuery('card-types', async (): Promise<Array<CardType>> => {
+        const uri = `${baseUri}/cardtypes`
+        const response = await fetch(uri).then((res) => res.json())
+
+        return response.map((rawCardType: any) => parseCardType(rawCardType))
+    })
+}
 // Reporting
 
 export const useGetMostReviewedCardTypes =  () => {
