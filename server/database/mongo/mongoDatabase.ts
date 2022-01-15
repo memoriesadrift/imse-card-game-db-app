@@ -93,6 +93,16 @@ export class MongoDatabase implements IDatabase {
     return true;
   }
 
+  private extractReview(review:Review) {
+    return {
+      cardGameID: review.cardGameId,
+      leftBy: review.leftByUser,
+      reviewText: review.text,
+      rating: review.rating,
+      creationTimestamp: review.timestamp
+    };
+  }
+
   async insertReviews(reviews: Review[]):Promise<boolean> {
     try {
       await this.client.connect();
@@ -101,15 +111,7 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
-    const mongoList = reviews.map(review => {
-      return {
-        cardGameID: review.cardGameId,
-        leftBy: review.leftByUser,
-        reviewText: review.text,
-        rating: review.rating,
-        creationTimestamp: review.timestamp
-      }
-    });
+    const mongoList = reviews.map(review => this.extractReview(review));
 
     const result =  await this.client.db(this.database).collection('review').insertMany(mongoList);
 
@@ -333,8 +335,30 @@ export class MongoDatabase implements IDatabase {
   }
 
 
-  insertReview(cardGameId: number, review: Review): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async insertReview(cardGameId: string, review: Review): Promise<boolean> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return false;
+    }
+
+    const objId = new ObjectId(cardGameId);
+
+    const userFound = await this.client.db(this.database).collection('user').findOne({name: review.leftByUser});
+    const cardGameFound = await this.client.db(this.database).collection('cardGame').findOne({_id: cardGameId});
+
+    review.cardGameId = objId;
+    const res = await this.client.db(this.database).collection('review').insertOne(this.extractReview(review));
+
+    await this.client.close();
+
+    if(!res.acknowledged) {
+      console.log("Something went wrong when inserting card types into mongo!");
+      return false;
+    }
+    
+    return true;
   }
   
 }
