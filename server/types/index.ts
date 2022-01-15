@@ -1,13 +1,16 @@
+import { ObjectId, Timestamp } from "mongodb"
+
 export type URL = string & {__type: 'URL'}
 
 export type Verification = {
   comment: string,
-  timestamp: number,
+  timestamp: Timestamp,
   verifiedByAdmin: string,
 }
 
 export type Review = {
-  id?: number,
+  id?: number | ObjectId,
+  cardGameId?: number,
   text: string,
   rating: number,
   timestamp?: number,
@@ -15,13 +18,13 @@ export type Review = {
 }
 
 export type CardType = {
-  id: number,
+  id: number | ObjectId,
   name: string,
   wikipediaLink: URL,
 }
 
 export type CardGame = {
-  id?: number,
+  id?: number | ObjectId,
   name: string,
   cardType: CardType,
   description: string,
@@ -40,5 +43,9 @@ export type ReportTwo = {
 }
 
 export type User = {
-  username: string // we do not need more than this for our usecase
+  username: string,
+  passwordHash: string,
+  email: string,
+  birthday: Date,
+  favorites?: number[] | ObjectId[]
 }

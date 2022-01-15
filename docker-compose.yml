@@ -12,6 +12,16 @@ services:
       MYSQL_USER: ise-editor
       MYSQL_PASSWORD: ise-password
 
+  mongo:
+    build: ./mongo
+    container_name: ise-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ise-editor
+      MONGO_INITDB_ROOT_PASSWORD: ise-password
+      MONGO_INITDB_DATABASE: card-game
+    networks:
+      mongo-server:
+
   server:
     build: ./server
     container_name: ise-server
@@ -19,6 +29,7 @@ services:
     networks:
       server-nginx:
       sql-server:
+      mongo-server:
 
   app:
     build: ./app
@@ -46,3 +57,4 @@ networks:
   server-nginx:
   app-nginx:
   sql-server:
+  mongo-server:
