@@ -1,6 +1,7 @@
 import { CardGame, CardType, User, ReportOne, ReportTwo, Review } from "../../types";
 import { IDatabase } from "../IDatabase";
 import { Db, Document, MongoClient, ObjectId, OptionalId } from 'mongodb';
+import { deflateRawSync } from "zlib";
 
 export class MongoDatabase implements IDatabase {
 
@@ -128,11 +129,6 @@ export class MongoDatabase implements IDatabase {
       return [];
     }
 
-    const numberArr: number[] = [1];
-    if (typeof(favorites) === typeof(numberArr)) {
-      return [];
-    }
-
     const ret = favorites as ObjectId[];
 
     return ret;
@@ -217,9 +213,7 @@ export class MongoDatabase implements IDatabase {
 
   async getCardGame(id: string): Promise<CardGame | undefined> {
 
-    console.log(id);
     const objId = new ObjectId(id);
-    console.log(objId);
 
     try {
       await this.client.connect();
@@ -232,7 +226,6 @@ export class MongoDatabase implements IDatabase {
       {$match:{_id: objId}},
       {$lookup: {from: 'review', localField: '_id', foreignField:'cardGameID', as:'reviews'}} 
     ]).toArray();//findOne({_id: objId});
-    console.log(res)
 
     this.client.close();
 
@@ -287,11 +280,76 @@ export class MongoDatabase implements IDatabase {
   }
 
 
-  getReportOne(): Promise<ReportOne[] | undefined> {
-    throw new Error("Method not implemented.");
+  async getReportOne(): Promise<ReportOne[] | undefined> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return undefined;
+    }
+
+    const today = Date.now();
+    const thirtyDaysAgo = new Date(today - 1000 * 60 * 60 * 24 * 30);
+    console.log(thirtyDaysAgo);
+    const res = await this.client.db(this.database).collection('review').aggregate([
+      {$match: {creationTimestamp: {$gte: thirtyDaysAgo}}},
+      {$lookup: {from: 'cardGame', localField: 'cardGameID', foreignField:'_id', as:'cardGame'}},
+      {$group: {_id: '$cardGame.cardType.name', reviewCount: {$count: {}}}},
+      {$sort: {reviewCount: -1}}
+    ]).toArray();
+
+    this.client.close();
+
+    if (!res) {
+      return undefined;
+    }
+
+    return res.map(report => ({
+      cardTypeName: report._id[0], // id is an array now
+      reviewCount: report.reviewCount
+    }));
+
   }
-  getReportTwo(): Promise<ReportTwo[] | undefined> {
-    throw new Error("Method not implemented.");
+  async getReportTwo(): Promise<ReportTwo[] | undefined> {
+
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return undefined;
+    }
+
+    const today = Date.now();
+    const thirteenYearsAgo = new Date(today - 1000 * 60 * 60 * 24 * 365.25 * 13);
+    const eighteenYearsAgo = new Date(today - 1000 * 60 * 60 * 24 * 365.25 * 18)
+    
+    console.log(thirteenYearsAgo);
+    console.log(eighteenYearsAgo);
+
+    const res = await this.client.db(this.database).collection('user').aggregate([
+      {$match: {birthday: {
+        $gte: eighteenYearsAgo,
+        $lte: thirteenYearsAgo
+      }}},
+      {$unwind: {path: '$favorites'}},
+      {$lookup: {from: 'cardGame', localField: 'favorites', foreignField:'_id', as:'cardGame'}},
+      {$match: {"cardGame.verification": {$exists: true}}},
+      {$group: {_id: '$cardGame.name', userCount: {$count: {}}}},
+      {$sort: {userCount: -1}}
+    ]).toArray();
+
+
+    this.client.close();
+
+    if (!res) {
+      return undefined;
+    }
+
+    return res.map(report => ({
+      cardGameName: report._id[0], // id is an array now
+      userCount: report.userCount
+    }));
+    
   }
 
   async updateCardGame(cardGame: CardGame): Promise<boolean> {
