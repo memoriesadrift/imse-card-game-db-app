@@ -291,8 +291,25 @@ export class MongoDatabase implements IDatabase {
   getReportTwo(): Promise<ReportTwo[] | undefined> {
     throw new Error("Method not implemented.");
   }
-  updateCardGame(cardGame: CardGame): Promise<boolean> {
-    throw new Error("Method not implemented.");
+
+  async updateCardGame(cardGame: CardGame): Promise<boolean> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return false;
+    }
+
+    const res = await this.client.db(this.database).collection('cardGame').updateOne({_id: cardGame.id as ObjectId}, this.extractCardGame(cardGame));
+
+    await this.client.close();
+
+    if(!res.acknowledged) {
+      console.log("Something went wrong when inserting card types into mongo!");
+      return false;
+    }
+    
+    return true;
   }
   
   async insertCardGame(cardGame: CardGame): Promise<boolean> {
@@ -315,7 +332,7 @@ export class MongoDatabase implements IDatabase {
     return true;
   }
 
-  
+
   insertReview(cardGameId: number, review: Review): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
