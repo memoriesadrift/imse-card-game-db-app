@@ -1,5 +1,6 @@
 // TODO: Upgrade to TS
 import express, { json } from 'express';
+import { ObjectId } from 'mongodb';
 import { convertCardGame, convertReview } from './converters.js';
 import { migrateDatabase } from './database/databaseMigrate.js';
 import { IDatabase } from './database/IDatabase.js';
@@ -62,7 +63,10 @@ app.get('/api/games', async (_req, res) => {
 
 // Get single game
 app.get('/api/games/:id', async (req, res) => {
-  const cardGame = await database.getCardGame(parseInt(req.params.id));
+ 
+  const id = req.params.id.length === 24 ? req.params.id : parseInt(req.params.id);
+  
+  const cardGame = await database.getCardGame(id);
   if (!cardGame) {
     res.status(500).send({});
   } else {
