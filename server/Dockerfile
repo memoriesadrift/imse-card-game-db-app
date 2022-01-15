@@ -12,7 +12,7 @@ COPY yarn.lock ./
 RUN yarn install
 
 # bundle app source
-COPY . . 
+COPY . .
 
 EXPOSE 8080
 
