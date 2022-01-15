@@ -67,6 +67,7 @@ export class MongoDatabase implements IDatabase {
         verifiedByAdmin: cardGame.verification.verifiedByAdmin
       };
       return {
+        _id: cardGame.id as ObjectId,
         name: cardGame.name,
         cardType: {
           name: cardGame.cardType.name,
@@ -209,8 +210,39 @@ export class MongoDatabase implements IDatabase {
   }
 
 
-  getCardGame(id: number): Promise<CardGame | undefined> {
-    throw new Error("Method not implemented.");
+  async getCardGame(id: string): Promise<CardGame | undefined> {
+
+    console.log(id);
+    const objId = new ObjectId(id);
+    console.log(objId);
+
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return undefined;
+    }
+
+    const res = await this.client.db(this.database).collection('cardGame').aggregate([
+      {$match:{_id: objId}},
+      {$lookup: {from: 'review', localField: '_id', foreignField:'cardGameID', as:'reviews'}} 
+    ]).toArray();//findOne({_id: objId});
+    console.log(res)
+
+    this.client.close();
+
+    if (!res[0]) {
+      return undefined;
+    }
+
+    return {
+      id: res[0]._id,
+      name: res[0].name,
+      cardType: res[0].cardType,
+      description: res[0].description,
+      reviews: res[0].reviews,
+      verification: !res[0].verification ? undefined : res[0].verification
+    };
   }
   
   async getCardTypes(): Promise<CardType[] | undefined> {

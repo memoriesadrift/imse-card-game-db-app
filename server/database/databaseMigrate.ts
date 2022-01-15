@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { MongoDatabase } from "./mongo/mongoDatabase.js";
 import { RelationalDb } from "./RDBMS/relationaldb.js";
 
@@ -30,6 +31,11 @@ export async function migrateDatabase(): Promise<boolean> {
     return false;
   }
 
+  const oldToNewCardGameId:{[key:number]:ObjectId} = cardGames.reduce((prev, cur) => 
+    ({...prev, [cur.id as number]: new ObjectId(cur.id)}), {});
+
+  cardGames.forEach(game => game.id = oldToNewCardGameId[game.id as number]);
+  
   await mongoDb.insertCardGames(cardGames);
 
   // review
@@ -41,6 +47,7 @@ export async function migrateDatabase(): Promise<boolean> {
     return false;
   }
 
+  reviews.forEach(review => review.cardGameId = oldToNewCardGameId[review.cardGameId as number]);
   await mongoDb.insertReviews(reviews);
 
   // users
