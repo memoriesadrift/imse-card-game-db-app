@@ -1,23 +1,31 @@
 import React, { useState } from 'react'
 import { buildNewCardGameObject, cardTypeFromJSONString, cardTypeToJSONString, useGetCardTypes } from '../../dataLayer'
-import { useAddCardGame } from '../../dataLayer/mutations'
-import { CardType } from '../../types'
+import { useUpdateCardGame } from '../../dataLayer/mutations'
+import { CardGame, CardType } from '../../types'
 import { onChangeWrapper } from '../../utils'
 import { MutationGuard, QueryGuard } from '../Guards'
 
-export default function CreateGame() {
-    const addGame = useAddCardGame()
+type UpdateGameProps = {
+    cardGame: CardGame
+}
+
+export default function UpdateGame({cardGame}: UpdateGameProps) {
+    const updateGame = useUpdateCardGame()
     const cardTypesQuery = useGetCardTypes()
 
-    const [gameName, setGameName] = useState('')
-    const [description, setDescription] = useState('')
-    const [rawCardType, setRawCardType] = useState('')
+    const [gameName, setGameName] = useState(cardGame.name)
+    const [description, setDescription] = useState(cardGame.description)
+    const [rawCardType, setRawCardType] = useState(cardTypeToJSONString(cardGame.cardType))
 
     const submit = async () => {
         const cardType: CardType = cardTypeFromJSONString(rawCardType)
-        const newGame = buildNewCardGameObject(gameName, description, cardType)
+        const newGame = buildNewCardGameObject(gameName, description, cardType, cardGame.id)
+        console.log('posting game:')
+        console.log(JSON.stringify(newGame))
 
-        await addGame.mutateAsync(newGame)
+        try {
+            await updateGame.mutateAsync(newGame)
+        } catch (error) {}
     }
 
     return (
@@ -43,7 +51,12 @@ export default function CreateGame() {
                             <div className="uk-margin">
                                 <label className="uk-form-label" htmlFor="form-horizontal-select">Card Type</label>
                                 <div className="uk-form-controls">
-                                    <select className="uk-select" id="form-horizontal-select" onChange={(event) => setRawCardType(event.target.value)}>
+                                    <select
+                                        className="uk-select"
+                                        id="form-horizontal-select"
+                                        defaultValue={rawCardType}
+                                        onChange={(event) => setRawCardType(event.target.value)}
+                                    >
                                         {cardTypes.map((cardType) => (
                                             <option value={cardTypeToJSONString(cardType)} key={cardType.id}>{cardType.name}</option>
                                         ))}
@@ -69,10 +82,10 @@ export default function CreateGame() {
                                 className="uk-button uk-button-default uk-button-large"
                                 onClick={async () => await submit()}
                             >
-                                Submit
+                                Update
                             </button>  
                         </div>
-                        <MutationGuard {...addGame}/>
+                        <MutationGuard {...updateGame}/>
                     </div>
                 </div>
             )}

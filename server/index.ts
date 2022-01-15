@@ -15,7 +15,6 @@ const database = new RelationalDb();
 // Set headers for each request
 app.use((req, res, next) => {
   // Allow requests from client
-  console.log(req)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,GET,PUT,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
@@ -89,20 +88,20 @@ app.post('/api/games', async (req, res) => {
 app.put('/api/games/:id', async (req, res) => {
 
   const id = parseInt(req.params.id)
-  const cardGame = convertCardGame(req.body.cardGame);
+  const cardGame = convertCardGame(req.body);
 
-  if (!cardGame || !cardGame.id) {
-    res.status(422).send('Could not interpret body.');
+  if (!cardGame || !cardGame.id || id !== cardGame.id) {
+    res.status(422).send({"success":false});
     return;
   }
 
   const updateSuccessful = await database.updateCardGame(cardGame);
   if (!updateSuccessful) {
-    res.status(422).send('Updating card game failed');
+    res.status(422).send({"success":false});
     return;
   }
 
-  res.status(200).send('Successful!');
+  res.status(200).send({"success":true});
 })
 
 // Get card types
@@ -121,7 +120,7 @@ app.get('/api/cardtypes', async (_req, res) => {
 app.post('/api/games/review/:id', async (req, res) => {
   const id = parseInt(req.params.id)
 
-  const review = convertReview(req.body.review);
+  const review = convertReview(req.body);
   if (!review) {
     console.log("Converting review failed!");
     res.status(422).send({"success":false});
