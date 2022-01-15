@@ -6,6 +6,10 @@ export async function migrateDatabase(): Promise<boolean> {
   const relationalDb = new RelationalDb(); 
   const mongoDb = new MongoDatabase();
 
+  // drop existing entries
+  console.log("Purging database");
+  await mongoDb.purgeDatabase();
+
   // card types
   console.log("migrating card types");
   const cardTypes = await relationalDb.getCardTypes();

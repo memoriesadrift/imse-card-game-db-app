@@ -11,6 +11,23 @@ export class MongoDatabase implements IDatabase {
   private uri = `mongodb://${this.username}:${this.password}@ise-mongo`;
   private client = new MongoClient(this.uri);
 
+  async purgeDatabase() {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return false;
+    }
+
+    await this.client.db(this.database).collection('cardGame').deleteMany({});
+    await this.client.db(this.database).collection('cardType').deleteMany({});
+    await this.client.db(this.database).collection('review').deleteMany({});
+    await this.client.db(this.database).collection('user').deleteMany({});
+
+    await this.client.close();
+    return true;
+  }
+
   async insertCardTypes(cardTypes: CardType[]): Promise<boolean> {
     try {
       await this.client.connect();
@@ -138,7 +155,6 @@ export class MongoDatabase implements IDatabase {
         favorites: this.extractFavorites(user.favorites)
       }
     });
-    console.log(mongoList);
 
     const result =  await this.client.db(this.database).collection('user').insertMany(mongoList);
 
