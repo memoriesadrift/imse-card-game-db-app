@@ -1,6 +1,6 @@
 import { CardGame, CardType, User, ReportOne, ReportTwo, Review } from "../../types";
 import { IDatabase } from "../IDatabase";
-import { Document, MongoClient, ObjectId, OptionalId } from 'mongodb';
+import { Db, Document, MongoClient, ObjectId, OptionalId } from 'mongodb';
 
 export class MongoDatabase implements IDatabase {
 
@@ -147,15 +147,53 @@ export class MongoDatabase implements IDatabase {
   }
 
 
-  isDBReady(): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async isDBReady(): Promise<boolean> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return false;
+    }
+
+    this.client.close();
+    return true;
+
   }
-  populateDB(): Promise<boolean> {
-    throw new Error("Method not implemented.");
+
+  /**
+   * This method is not implemented for the mongoDatabase
+   * @returns false
+   */
+  async populateDB(): Promise<boolean> {
+    return false;
   }
-  getCardGames(): Promise<CardGame[] | undefined> {
-    throw new Error("Method not implemented.");
+
+
+  async getCardGames(): Promise<CardGame[] | undefined> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return undefined;
+    }
+
+    const res = await this.client.db(this.database).collection('cardGame').find().toArray();
+    console.log(res);
+
+    this.client.close();
+    return  res.map(document => {
+      return {
+        id: document._id,
+        name: document.name,
+        cardType: document.cardType,
+        description: document.description,
+        reviews: [],
+        verification: !document.verification ? undefined : document.verification
+      };
+    });
   }
+
+
   getCardGame(id: number): Promise<CardGame | undefined> {
     throw new Error("Method not implemented.");
   }
