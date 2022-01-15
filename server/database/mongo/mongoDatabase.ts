@@ -233,9 +233,23 @@ export class MongoDatabase implements IDatabase {
     });
   }
 
-  getUserNames(): Promise<any[] | undefined> {
-    throw new Error("Method not implemented.");
+  async getUserNames(): Promise<any[] | undefined> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return undefined;
+    }
+
+    const res = await this.client.db(this.database).collection('user').find().map(document => {
+      return {username: document.username};
+    }).toArray();
+
+    this.client.close();
+    return  res;
   }
+
+
   getReportOne(): Promise<ReportOne[] | undefined> {
     throw new Error("Method not implemented.");
   }
