@@ -1,4 +1,4 @@
-import { CardType, Review, WebLink, Verification, CardGame, Username } from "../types"
+import { CardType, Review, WebLink, Verification, CardGame, Username, PartialReview } from "../types"
 
 export const parseCardType = (json: any) => {
     const cardType: CardType = {
@@ -60,4 +60,8 @@ export const buildNewCardGameObject = (name: string, description: string, cardTy
         id: id || -1, // -1 for POST, discarded by server
         reviews: [],
     }
+}
+
+export const buildNewPartialReviewObject = (rating: number, text: string, leftByUser: Username): PartialReview => {
+    return {...{text, rating, leftByUser}}
 }

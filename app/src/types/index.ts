@@ -16,6 +16,12 @@ export type Review = {
     leftByUser: string,
 }
 
+export type PartialReview = {
+    text: string,
+    rating: number,
+    leftByUser: string,
+}
+
 export type CardType = {
     id: number,
     name: string,

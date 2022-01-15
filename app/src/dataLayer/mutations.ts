@@ -1,6 +1,6 @@
 import { useMutation } from "react-query"
 import { baseUri } from "."
-import { CardGame, Review } from "../types"
+import { CardGame, PartialReview } from "../types"
 
 // TODO: maybe do something with responses
 
@@ -57,7 +57,7 @@ export const useUpdateCardGame = () => {
 }
 
 type LeaveReviewParams = {
-    review: Review,
+    review: PartialReview,
     forGameId: number,
 }
 
@@ -74,7 +74,8 @@ export const useLeaveReview = () => {
                 },
                 body: JSON.stringify(review)
             }
-        )
+        ).then((res) => res.json())
+        if (!response.success) throw Error('Update unsuccessful!')
         return response.json()
     })
 }
