@@ -194,7 +194,6 @@ export class MongoDatabase implements IDatabase {
     }
 
     const res = await this.client.db(this.database).collection('cardGame').find().toArray();
-    console.log(res);
 
     this.client.close();
     return  res.map(document => {
@@ -213,9 +212,27 @@ export class MongoDatabase implements IDatabase {
   getCardGame(id: number): Promise<CardGame | undefined> {
     throw new Error("Method not implemented.");
   }
-  getCardTypes(): Promise<CardType[] | undefined> {
-    throw new Error("Method not implemented.");
+  
+  async getCardTypes(): Promise<CardType[] | undefined> {
+    try {
+      await this.client.connect();
+    } catch(e: unknown) {
+      console.log('connection failed');
+      return undefined;
+    }
+
+    const res = await this.client.db(this.database).collection('cardType').find().toArray();
+
+    this.client.close();
+    return  res.map(document => {
+      return {
+        id: document._id,
+        name: document.name,
+        wikipediaLink: document.wikipediaLink
+      };
+    });
   }
+
   getUserNames(): Promise<any[] | undefined> {
     throw new Error("Method not implemented.");
   }
