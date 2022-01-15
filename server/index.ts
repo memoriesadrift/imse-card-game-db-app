@@ -2,6 +2,8 @@
 import express, { json } from 'express';
 import { convertCardGame, convertReview } from './converters.js';
 import { migrateDatabase } from './database/databaseMigrate.js';
+import { IDatabase } from './database/IDatabase.js';
+import { MongoDatabase } from './database/mongo/mongoDatabase.js';
 const app = express()
 import {RelationalDb} from "./database/RDBMS/relationaldb.js";
 
@@ -9,7 +11,7 @@ const port = 8080
 
 app.use(json()) // enable JSON parsing in request body, for POST requests
 
-const database = new RelationalDb();
+let database:IDatabase = new RelationalDb();
 
 
 // Set headers for each request
@@ -39,8 +41,12 @@ app.get('/api/populate', async (_req, res) => {
 });
 
 app.get('/api/migrate', async (_req, res) => {
-  await migrateDatabase();
-  res.status(200).send(":)");
+  const success = await migrateDatabase();
+
+  if (success) {
+    database = new MongoDatabase()
+    res.status(200).send(":)");
+  }
 });
 
 // List games
