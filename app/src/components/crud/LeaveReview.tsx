@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { buildNewPartialReviewObject, useUsers } from '../../dataLayer'
+import { buildNewPartialReviewObject, useGetUsers } from '../../dataLayer'
 import { useLeaveReview } from '../../dataLayer/mutations'
 import { Username } from '../../types'
 import { onChangeWrapper } from '../../utils'
@@ -11,7 +11,7 @@ type LeaveReviewProps = {
 
 export default function LeaveReview({gameId}: LeaveReviewProps) {
     const leaveReview = useLeaveReview()
-    const usersQuery = useUsers()
+    const usersQuery = useGetUsers()
 
     const [rating, setRating] = useState(1)
     const [reviewText, setReviewText] = useState('')

@@ -31,7 +31,7 @@ export const useGetCardTypes = () => {
     })
 }
 
-export const useUsers = () => {
+export const useGetUsers = () => {
     return useQuery('users', async (): Promise<Array<Username>> => {
         const uri = `${baseUri}/users`
         const response = await fetch(uri).then((res) => res.json())
@@ -47,7 +47,14 @@ export const useGetMostReviewedCardTypes =  () => {
         const uri = `${baseUri}/reports/1`
         const response = await fetch(uri).then((res) => res.json())
 
-        return response.map((rawRes: any) => {rawRes.cardTypeName, rawRes.reviewCount})
+        if (!response.success) throw Error('Query unsuccessful!')
+        console.log(response)
+        return response.report.map((rawRes: any) => {
+            return {
+                cardTypeName: rawRes.cardTypeName,
+                reviewCount: rawRes.reviewCount
+            }
+        })
     })
 }
 
@@ -56,6 +63,12 @@ export const useGetPopularCardGamesForTeens = () => {
         const uri = `${baseUri}/reports/2`
         const response = await fetch(uri).then((res) => res.json())
 
-        return response.map((rawRes: any) => {rawRes.cardGameName, rawRes.userCount})
+        if (!response.success) throw Error('Query unsuccessful!')
+        console.log(response)
+        return response.report.map((rawRes: any) => {
+            return {
+                cardGameName: rawRes.cardGameName,
+                userCount: rawRes.userCount}
+            })
     })
 }

@@ -138,6 +138,7 @@ app.post('/api/games/review/:id', async (req, res) => {
 });
   
 
+// Reports
 app.get('/api/reports/1', async (req, res) => {
   const reportOne = await database.getReportOne();
 
@@ -146,7 +147,7 @@ app.get('/api/reports/1', async (req, res) => {
     return;
   }
 
-  res.status(200).send(reportOne);
+  res.status(200).send({"success":true, report: reportOne});
 });
 
 app.get('/api/reports/2', async (req, res) => {
@@ -157,7 +158,7 @@ app.get('/api/reports/2', async (req, res) => {
     return;
   }
   
-  res.status(200).send(reportTwo);
+  res.status(200).send({"success":true, report: reportTwo});
 });
 
 // Get Users
