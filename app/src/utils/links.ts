@@ -1,9 +1,6 @@
 // Home
 export const home = '/'
 
-// Auth
-export const login = '/login'
-
 // Games
 export const games = '/games'
 export const addGame = '/games/add'

@@ -1,12 +1,10 @@
-import { CardType, Review, WebLink, Verification, CardGame } from "../types"
+import { CardType, Review, WebLink, Verification, CardGame, Username, PartialReview } from "../types"
 
 export const parseCardType = (json: any) => {
-    const cardType: {cardType: CardType} = {
-        cardType: {
-            name: json.name,
-            id: json.id,
-            wikipediaLink: json.wikipediaLink as WebLink,
-        }
+    const cardType: CardType = {
+        name: json.name,
+        id: json.id,
+        wikipediaLink: json.wikipediaLink as WebLink,
     }
 
     return cardType
@@ -50,17 +48,20 @@ export const parseCardGame = (json: any) =>  {
     return {...baseObj, ...cardType, ...reviews, ...verification}
 }
 
-// TODO: implement
-export const cardTypeFromName = (name: string): CardType => { return {
-      id: 1,
-      name: 'French-suited playing cards',
-      wikipediaLink: 'https://en.wikipedia.org/wiki/French-suited_playing_cards' as WebLink,
-}}
+export const extractUsername = (rawUser: any) => {
+    return rawUser.username as Username
+}
+export const cardTypeToJSONString = (cardType: CardType) => JSON.stringify(cardType)
+export const cardTypeFromJSONString = (value: string) => JSON.parse(value) as CardType
 
-export const buildNewCardGameObject = (name: string, description: string, cardType: CardType): CardGame => {
+export const buildNewCardGameObject = (name: string, description: string, cardType: CardType, id?: number): CardGame => {
     return {
         ...{name, description, cardType},
-        id: -1, // discarded by server
+        id: id || -1, // -1 for POST, discarded by server
         reviews: [],
     }
+}
+
+export const buildNewPartialReviewObject = (rating: number, text: string, leftByUser: Username): PartialReview => {
+    return {...{text, rating, leftByUser}}
 }
