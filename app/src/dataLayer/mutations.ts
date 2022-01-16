@@ -57,7 +57,7 @@ export const useUpdateCardGame = () => {
 
 type LeaveReviewParams = {
     review: PartialReview,
-    forGameId: number,
+    forGameId: string,
 }
 
 export const useLeaveReview = () => {

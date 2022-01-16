@@ -6,7 +6,7 @@ import { onChangeWrapper } from '../../utils'
 import { MutationGuard, QueryGuard } from '../Guards'
 
 type LeaveReviewProps = {
-    gameId: number,
+    gameId: string,
 }
 
 export default function LeaveReview({gameId}: LeaveReviewProps) {

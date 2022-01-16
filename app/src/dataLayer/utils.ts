@@ -12,7 +12,7 @@ export const parseCardType = (json: any) => {
 
 export const parseCardGame = (json: any) =>  {
     const baseObj = {
-        id: parseInt(json.id),
+        id: json.id,
         name: json.name,
         description: json.description,
     }
@@ -54,10 +54,10 @@ export const extractUsername = (rawUser: any) => {
 export const cardTypeToJSONString = (cardType: CardType) => JSON.stringify(cardType)
 export const cardTypeFromJSONString = (value: string) => JSON.parse(value) as CardType
 
-export const buildNewCardGameObject = (name: string, description: string, cardType: CardType, id?: number): CardGame => {
+export const buildNewCardGameObject = (name: string, description: string, cardType: CardType, id?: string): CardGame => {
     return {
         ...{name, description, cardType},
-        id: id || -1, // -1 for POST, discarded by server
+        id: id || '',
         reviews: [],
     }
 }

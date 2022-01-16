@@ -9,7 +9,7 @@ export default function EditGame() {
     const router = useClientRouter()
     const {id} = router.query
 
-    const cardGameQuery = useGetCardGame(parseInt(id as string))
+    const cardGameQuery = useGetCardGame(id as string)
 
     return (
         <>

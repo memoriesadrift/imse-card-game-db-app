@@ -66,7 +66,7 @@ app.get('/api/games', async (_req, res) => {
 // Get single game
 app.get('/api/games/:id', async (req, res) => {
  
-  const id = req.params.id.length === 24 ? req.params.id : parseInt(req.params.id);
+  const id = req.params.id;
   
   const cardGame = await database.getCardGame(id);
   if (!cardGame) {
@@ -130,7 +130,7 @@ app.get('/api/cardtypes', async (_req, res) => {
 
 // POST review
 app.post('/api/games/review/:id', async (req, res) => {
-  const id = parseInt(req.params.id)
+  const id = req.params.id
 
   const review = convertReview(req.body);
   if (!review) {
