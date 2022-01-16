@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
 import { CardType } from '../../types'
-import { game as gameLink } from '../../utils/links'
 
 type CardTypeListCardProps = {
     cardType: CardType,

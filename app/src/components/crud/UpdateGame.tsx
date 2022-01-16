@@ -20,8 +20,6 @@ export default function UpdateGame({cardGame}: UpdateGameProps) {
     const submit = async () => {
         const cardType: CardType = cardTypeFromJSONString(rawCardType)
         const newGame = buildNewCardGameObject(gameName, description, cardType, cardGame.id)
-        console.log('posting game:')
-        console.log(JSON.stringify(newGame))
 
         try {
             await updateGame.mutateAsync(newGame)

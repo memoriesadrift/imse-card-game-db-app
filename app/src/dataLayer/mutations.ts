@@ -50,7 +50,6 @@ export const useUpdateCardGame = () => {
                 body: JSON.stringify(game)
             }
         ).then((res) => res.json())
-        console.log(response)
         if (!response.success) throw Error('Update unsuccessful!')
         return response
     })
@@ -58,7 +57,7 @@ export const useUpdateCardGame = () => {
 
 type LeaveReviewParams = {
     review: PartialReview,
-    forGameId: number,
+    forGameId: string,
 }
 
 export const useLeaveReview = () => {
