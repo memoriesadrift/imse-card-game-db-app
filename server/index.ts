@@ -1,7 +1,10 @@
 // TODO: Upgrade to TS
 import express, { json } from 'express';
+import { ObjectId } from 'mongodb';
 import { convertCardGame, convertReview } from './converters.js';
 import { migrateDatabase } from './database/databaseMigrate.js';
+import { IDatabase } from './database/IDatabase.js';
+import { MongoDatabase } from './database/mongo/mongoDatabase.js';
 const app = express()
 import {RelationalDb} from "./database/RDBMS/relationaldb.js";
 
@@ -9,7 +12,7 @@ const port = 8080
 
 app.use(json()) // enable JSON parsing in request body, for POST requests
 
-const database = new RelationalDb();
+let database:IDatabase = new RelationalDb();
 
 
 // Set headers for each request
@@ -39,8 +42,14 @@ app.get('/api/populate', async (_req, res) => {
 });
 
 app.get('/api/migrate', async (_req, res) => {
-  await migrateDatabase();
-  res.status(200).send(":)");
+  const success = await migrateDatabase();
+
+  if (success) {
+    database = new MongoDatabase()
+    res.status(200).send({"success": true});
+  } else {
+    res.status(400).send({"success": false});
+  }
 });
 
 // List games
@@ -56,7 +65,11 @@ app.get('/api/games', async (_req, res) => {
 
 // Get single game
 app.get('/api/games/:id', async (req, res) => {
-  const cardGame = await database.getCardGame(parseInt(req.params.id));
+ 
+  const id = req.params.id;
+  
+  const cardGame = await database.getCardGame(id);
+  console.log(cardGame);
   if (!cardGame) {
     res.status(500).send({});
   } else {
@@ -118,7 +131,7 @@ app.get('/api/cardtypes', async (_req, res) => {
 
 // POST review
 app.post('/api/games/review/:id', async (req, res) => {
-  const id = parseInt(req.params.id)
+  const id = req.params.id
 
   const review = convertReview(req.body);
   if (!review) {

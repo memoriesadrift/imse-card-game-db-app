@@ -9,7 +9,7 @@ export type Verification = {
 }
 
 export type Review = {
-    id: number,
+    id: string,
     text: string,
     rating: number,
     timestamp: number,
@@ -23,13 +23,13 @@ export type PartialReview = {
 }
 
 export type CardType = {
-    id: number,
+    id: string,
     name: string,
     wikipediaLink: WebLink,
 }
 
 export type CardGame = {
-    id: number,
+    id: string,
     name: string,
     cardType: CardType,
     description: string,
