@@ -1,5 +1,7 @@
 export type WebLink = string & {__type: 'URL'}
 
+export type Username = string & {__type: 'Username'}
+
 export type Verification = {
     comment: string,
     timestamp: number,
@@ -11,6 +13,12 @@ export type Review = {
     text: string,
     rating: number,
     timestamp: number,
+    leftByUser: string,
+}
+
+export type PartialReview = {
+    text: string,
+    rating: number,
     leftByUser: string,
 }
 
@@ -27,4 +35,15 @@ export type CardGame = {
     description: string,
     reviews: Array<Review>,
     verification?: Verification,
+}
+
+// TODO: Expand using dependent query to include more data
+export type ReportOne = {
+  cardTypeName: string,
+  reviewCount: number
+}
+
+export type ReportTwo = {
+  cardGameName: string,
+  userCount: number
 }

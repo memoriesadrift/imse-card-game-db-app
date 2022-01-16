@@ -1,7 +1,7 @@
 import { useQuery } from "react-query"
-import { CardGame, CardType } from "../types"
+import { CardGame, CardType, ReportOne, ReportTwo, Username } from "../types"
 import { baseUri } from "./constants"
-import { parseCardGame, parseCardType } from "./utils"
+import { extractUsername, parseCardGame, parseCardType } from "./utils"
 
 export const useGetCardGames = () => {
     return useQuery('card-games', async (): Promise<Array<CardGame>> => {
@@ -22,22 +22,53 @@ export const useGetCardGame = (id: number | undefined) => {
     })
 }
 
+export const useGetCardTypes = () => {
+    return useQuery('card-types', async (): Promise<Array<CardType>> => {
+        const uri = `${baseUri}/cardtypes`
+        const response = await fetch(uri).then((res) => res.json())
+
+        return response.map((rawCardType: any) => parseCardType(rawCardType))
+    })
+}
+
+export const useGetUsers = () => {
+    return useQuery('users', async (): Promise<Array<Username>> => {
+        const uri = `${baseUri}/users`
+        const response = await fetch(uri).then((res) => res.json())
+
+        return response.map((rawUser: any) => extractUsername(rawUser))
+    })
+}
+
 // Reporting
 
 export const useGetMostReviewedCardTypes =  () => {
-    return useQuery('most-reviewed-card-type', async (): Promise<Array<CardType>> => {
+    return useQuery('most-reviewed-card-type', async (): Promise<Array<ReportOne>> => {
         const uri = `${baseUri}/reports/1`
         const response = await fetch(uri).then((res) => res.json())
 
-        return response.map((rawRes: any) => parseCardType(rawRes))
+        if (!response.success) throw Error('Query unsuccessful!')
+        console.log(response)
+        return response.report.map((rawRes: any) => {
+            return {
+                cardTypeName: rawRes.cardTypeName,
+                reviewCount: rawRes.reviewCount
+            }
+        })
     })
 }
 
 export const useGetPopularCardGamesForTeens = () => {
-    return useQuery('most-popular-games-for-teens', async (): Promise<Array<CardGame>> => {
+    return useQuery('most-popular-games-for-teens', async (): Promise<Array<ReportTwo>> => {
         const uri = `${baseUri}/reports/2`
         const response = await fetch(uri).then((res) => res.json())
 
-        return response.map((rawRes: any) => parseCardGame(rawRes))
+        if (!response.success) throw Error('Query unsuccessful!')
+        console.log(response)
+        return response.report.map((rawRes: any) => {
+            return {
+                cardGameName: rawRes.cardGameName,
+                userCount: rawRes.userCount}
+            })
     })
 }
