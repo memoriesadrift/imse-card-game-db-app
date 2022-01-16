@@ -69,6 +69,7 @@ app.get('/api/games/:id', async (req, res) => {
   const id = req.params.id;
   
   const cardGame = await database.getCardGame(id);
+  console.log(cardGame);
   if (!cardGame) {
     res.status(500).send({});
   } else {

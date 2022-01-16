@@ -28,7 +28,7 @@ export const parseCardGame = (json: any) =>  {
     const reviews: {reviews: Array<Review>} = {
         reviews: json.reviews.map((rawReview: any): Review => {
             return {
-                id: parseInt(rawReview.id),
+                id: rawReview.id,
                 text: rawReview.text,
                 rating: parseInt(rawReview.rating),
                 timestamp: parseInt(rawReview.timestamp),
