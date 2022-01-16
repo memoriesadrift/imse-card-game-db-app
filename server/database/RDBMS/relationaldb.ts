@@ -524,7 +524,6 @@ export class RelationalDb implements IDatabase {
       return undefined;
     }
 
-<<<<<<< HEAD
     const queryRes = await con.query('SELECT * FROM User');
     const usersRes = (queryRes[0] as mysql.RowDataPacket[]);
 
@@ -551,12 +550,4 @@ export class RelationalDb implements IDatabase {
 
     return reviewRes.map(data => this.extractReview(data));
   }
-=======
-    const queryRes = await con.query('SELECT Username FROM User');
-    const usersRes = (queryRes[0] as mysql.RowDataPacket[]);
-
-    return usersRes.map(data => this.extractUser(data));
-  }
-
->>>>>>> 758a0c4... UNTESTED: added users endpoint (#20)
 }

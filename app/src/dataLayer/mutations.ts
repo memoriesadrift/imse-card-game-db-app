@@ -50,7 +50,6 @@ export const useUpdateCardGame = () => {
                 body: JSON.stringify(game)
             }
         ).then((res) => res.json())
-        console.log(response)
         if (!response.success) throw Error('Update unsuccessful!')
         return response
     })

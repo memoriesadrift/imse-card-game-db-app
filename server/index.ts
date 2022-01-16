@@ -46,7 +46,9 @@ app.get('/api/migrate', async (_req, res) => {
 
   if (success) {
     database = new MongoDatabase()
-    res.status(200).send(":)");
+    res.status(200).send({"success": true});
+  } else {
+    res.status(400).send({"success": false});
   }
 });
 

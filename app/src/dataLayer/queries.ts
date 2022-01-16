@@ -48,7 +48,6 @@ export const useGetMostReviewedCardTypes =  () => {
         const response = await fetch(uri).then((res) => res.json())
 
         if (!response.success) throw Error('Query unsuccessful!')
-        console.log(response)
         return response.report.map((rawRes: any) => {
             return {
                 cardTypeName: rawRes.cardTypeName,
@@ -64,7 +63,6 @@ export const useGetPopularCardGamesForTeens = () => {
         const response = await fetch(uri).then((res) => res.json())
 
         if (!response.success) throw Error('Query unsuccessful!')
-        console.log(response)
         return response.report.map((rawRes: any) => {
             return {
                 cardGameName: rawRes.cardGameName,
