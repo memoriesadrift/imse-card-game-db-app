@@ -12,7 +12,7 @@ export const useGetCardGames = () => {
     })
 }
 
-export const useGetCardGame = (id: number | undefined) => {
+export const useGetCardGame = (id: string | undefined) => {
     return useQuery('card-game', async (): Promise<CardGame | undefined> => {
         if (id === undefined) return undefined
         const uri = `${baseUri}/games/${id}`

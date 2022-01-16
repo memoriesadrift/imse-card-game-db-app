@@ -29,7 +29,7 @@ export type CardType = {
 }
 
 export type CardGame = {
-    id: number,
+    id: string,
     name: string,
     cardType: CardType,
     description: string,
