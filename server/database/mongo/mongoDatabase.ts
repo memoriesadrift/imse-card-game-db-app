@@ -2,6 +2,7 @@ import { CardGame, CardType, User, ReportOne, ReportTwo, Review } from "../../ty
 import { IDatabase } from "../IDatabase";
 import { Db, Document, MongoClient, ObjectId, OptionalId } from 'mongodb';
 import { deflateRawSync } from "zlib";
+import { extractCardGame, extractFavorites, extractReview } from "./objectToMongoExtractors";
 
 export class MongoDatabase implements IDatabase {
 
@@ -12,6 +13,10 @@ export class MongoDatabase implements IDatabase {
   private uri = `mongodb://${this.username}:${this.password}@ise-mongo`;
   private client = new MongoClient(this.uri);
 
+  private getDatabase(): Db {
+    return this.client.db(this.database)
+  }
+
   async purgeDatabase() {
     try {
       await this.client.connect();
@@ -20,10 +25,10 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
-    await this.client.db(this.database).collection('cardGame').deleteMany({});
-    await this.client.db(this.database).collection('cardType').deleteMany({});
-    await this.client.db(this.database).collection('review').deleteMany({});
-    await this.client.db(this.database).collection('user').deleteMany({});
+    await this.getDatabase().collection('cardGame').deleteMany({});
+    await this.getDatabase().collection('cardType').deleteMany({});
+    await this.getDatabase().collection('review').deleteMany({});
+    await this.getDatabase().collection('user').deleteMany({});
 
     await this.client.close();
     return true;
@@ -41,7 +46,7 @@ export class MongoDatabase implements IDatabase {
       return {name: cardType.name, wikipediaLink: cardType.wikipediaLink}
     });
 
-    const result =  await this.client.db(this.database).collection('cardType').insertMany(mongoListings);
+    const result =  await this.getDatabase().collection('cardType').insertMany(mongoListings);
 
     await this.client.close();
 
@@ -51,24 +56,6 @@ export class MongoDatabase implements IDatabase {
     }
 
     return true;
-  }
-
-  private extractCardGame(cardGame: CardGame, id?: ObjectId | undefined) {
-    const verification = !cardGame.verification ? undefined : {
-      comment: cardGame.verification.comment,
-      timestamp: cardGame.verification.timestamp,
-      verifiedByAdmin: cardGame.verification.verifiedByAdmin
-    };
-    return {
-      _id: id,
-      name: cardGame.name,
-      cardType: {
-        name: cardGame.cardType.name,
-        wikipediaLink: cardGame.cardType.wikipediaLink
-      },
-      description: cardGame.description,
-      verification: verification
-    }
   }
 
   async insertCardGames(cardGames: CardGame[]):Promise<boolean> {
@@ -79,10 +66,9 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
+    const mongoList = cardGames.map(cardGame => extractCardGame(cardGame, cardGame.id as ObjectId));
 
-    const mongoList = cardGames.map(cardGame => this.extractCardGame(cardGame, cardGame.id as ObjectId));
-
-    const result =  await this.client.db(this.database).collection('cardGame').insertMany(mongoList);
+    const result =  await this.getDatabase().collection('cardGame').insertMany(mongoList);
 
     await this.client.close();
 
@@ -94,16 +80,6 @@ export class MongoDatabase implements IDatabase {
     return true;
   }
 
-  private extractReview(review:Review) {
-    return {
-      cardGameID: review.cardGameId,
-      leftBy: review.leftByUser,
-      reviewText: review.text,
-      rating: review.rating,
-      creationTimestamp: review.timestamp
-    };
-  }
-
   async insertReviews(reviews: Review[]):Promise<boolean> {
     try {
       await this.client.connect();
@@ -112,26 +88,12 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
-    const mongoList = reviews.map(review => this.extractReview(review));
+    const mongoList = reviews.map(review => extractReview(review));
 
-    const result =  await this.client.db(this.database).collection('review').insertMany(mongoList);
+    const result =  await this.getDatabase().collection('review').insertMany(mongoList);
 
     await this.client.close();
     return true;
-  }
-
-  private extractFavorites(favorites: number[] | ObjectId[] | undefined): ObjectId[] {
-    if (!favorites) {
-      return [];
-    }
-
-    if (favorites.length == 0) {
-      return [];
-    }
-
-    const ret = favorites as ObjectId[];
-
-    return ret;
   }
 
   async insertUsers(users: User[]):Promise<boolean> {
@@ -154,11 +116,11 @@ export class MongoDatabase implements IDatabase {
         passwordHash: user.passwordHash,
         email: user.email,
         birthday: user.birthday,
-        favorites: this.extractFavorites(user.favorites)
+        favorites: extractFavorites(user.favorites)
       }
     });
 
-    const result =  await this.client.db(this.database).collection('user').insertMany(mongoList);
+    const result =  await this.getDatabase().collection('user').insertMany(mongoList);
 
     await this.client.close();
     return true;
@@ -195,7 +157,7 @@ export class MongoDatabase implements IDatabase {
       return undefined;
     }
 
-    const res = await this.client.db(this.database).collection('cardGame').find().toArray();
+    const res = await this.getDatabase().collection('cardGame').find().toArray();
 
     this.client.close();
     return  res.map(document => {
@@ -222,7 +184,7 @@ export class MongoDatabase implements IDatabase {
       return undefined;
     }
 
-    const res = await this.client.db(this.database).collection('cardGame').aggregate([
+    const res = await this.getDatabase().collection('cardGame').aggregate([
       {$match:{_id: objId}},
       {$lookup: {from: 'review', localField: '_id', foreignField:'cardGameID', as:'reviews'}} 
     ]).toArray();//findOne({_id: objId});
@@ -251,7 +213,7 @@ export class MongoDatabase implements IDatabase {
       return undefined;
     }
 
-    const res = await this.client.db(this.database).collection('cardType').find().toArray();
+    const res = await this.getDatabase().collection('cardType').find().toArray();
 
     this.client.close();
     return  res.map(document => {
@@ -271,7 +233,7 @@ export class MongoDatabase implements IDatabase {
       return undefined;
     }
 
-    const res = await this.client.db(this.database).collection('user').find().map(document => {
+    const res = await this.getDatabase().collection('user').find().map(document => {
       return {username: document.username};
     }).toArray();
 
@@ -291,7 +253,7 @@ export class MongoDatabase implements IDatabase {
     const today = Date.now();
     const thirtyDaysAgo = new Date(today - 1000 * 60 * 60 * 24 * 30);
     console.log(thirtyDaysAgo);
-    const res = await this.client.db(this.database).collection('review').aggregate([
+    const res = await this.getDatabase().collection('review').aggregate([
       {$match: {creationTimestamp: {$gte: thirtyDaysAgo}}},
       {$lookup: {from: 'cardGame', localField: 'cardGameID', foreignField:'_id', as:'cardGame'}},
       {$group: {_id: '$cardGame.cardType.name', reviewCount: {$count: {}}}},
@@ -326,7 +288,7 @@ export class MongoDatabase implements IDatabase {
     console.log(thirteenYearsAgo);
     console.log(eighteenYearsAgo);
 
-    const res = await this.client.db(this.database).collection('user').aggregate([
+    const res = await this.getDatabase().collection('user').aggregate([
       {$match: {birthday: {
         $gte: eighteenYearsAgo,
         $lte: thirteenYearsAgo
@@ -360,7 +322,7 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
-    const res = await this.client.db(this.database).collection('cardGame').updateOne({_id: cardGame.id as ObjectId}, this.extractCardGame(cardGame));
+    const res = await this.getDatabase().collection('cardGame').updateOne({_id: cardGame.id as ObjectId}, extractCardGame(cardGame));
 
     await this.client.close();
 
@@ -380,7 +342,7 @@ export class MongoDatabase implements IDatabase {
       return false;
     }
 
-    const res = await this.client.db(this.database).collection('cardGame').insertOne(this.extractCardGame(cardGame));
+    const res = await this.getDatabase().collection('cardGame').insertOne(extractCardGame(cardGame));
 
     await this.client.close();
 
@@ -403,11 +365,11 @@ export class MongoDatabase implements IDatabase {
 
     const objId = new ObjectId(cardGameId);
 
-    const userFound = await this.client.db(this.database).collection('user').findOne({name: review.leftByUser});
-    const cardGameFound = await this.client.db(this.database).collection('cardGame').findOne({_id: cardGameId});
+    const userFound = await this.getDatabase().collection('user').findOne({name: review.leftByUser});
+    const cardGameFound = await this.getDatabase().collection('cardGame').findOne({_id: cardGameId});
 
     review.cardGameId = objId;
-    const res = await this.client.db(this.database).collection('review').insertOne(this.extractReview(review));
+    const res = await this.getDatabase().collection('review').insertOne(extractReview(review));
 
     await this.client.close();
 
