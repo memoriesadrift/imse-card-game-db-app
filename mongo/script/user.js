@@ -32,21 +32,7 @@ db.createCollection("user", {
             bsonType: "objectId",
             description: "the id of the favorited card game"
           }
-        }/*,
-        latestReviews: {
-          bsonType: "array",
-          required: true,
-          items: {
-            bsonType: "object",
-            required: ["cardGameID", "reviewText", "rating", "creatinTimestamp"],
-            properties: {
-              cardGameID: { bsonType: "objectId" },
-              reviewText: { bsonType: "string" },
-              rating: { bsonType: "number" },
-              creationTimestamp: { bsonType: "timestamp" }
-            }
-          }
-        }*/,
+        },
         admin: {
           bsonType: "objectId",
           required: ["realName", "profileDescription"],
