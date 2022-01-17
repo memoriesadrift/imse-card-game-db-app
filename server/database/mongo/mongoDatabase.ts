@@ -1,8 +1,7 @@
 import { CardGame, CardType, User, ReportOne, ReportTwo, Review } from "../../types";
 import { IDatabase } from "../IDatabase";
 import { Db, Document, MongoClient, ObjectId, OptionalId } from 'mongodb';
-import { deflateRawSync } from "zlib";
-import { extractCardGame, extractFavorites, extractReview } from "./objectToMongoExtractors";
+import { extractCardGame, extractFavorites, extractReview } from "./objectToMongoExtractors.js";
 
 export class MongoDatabase implements IDatabase {
 

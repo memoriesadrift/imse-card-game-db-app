@@ -2,7 +2,7 @@ import fs from 'fs';
 import mysql from 'mysql2/promise';
 import { CardGame, Review, CardType, Verification, ReportOne, ReportTwo, User } from '../../types';
 import { IDatabase } from '../IDatabase'
-import { extractCardGame, extractCardType, extractReportOne, extractReportTwo, extractReview, extractUser } from './rowDataPacketExtractors';
+import { extractCardGame, extractCardType, extractReportOne, extractReportTwo, extractReview, extractUser } from './rowDataPacketExtractors.js';
 
 export class RelationalDb implements IDatabase {
   
