@@ -1,2 +1,2 @@
 // TODO: use .env
-export const baseUri = 'http://localhost:8080/api'
+export const baseUri = 'https://localhost:8443/api'

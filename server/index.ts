@@ -17,7 +17,7 @@ let database:IDatabase = new RelationalDb();
 // Set headers for each request
 app.use((req, res, next) => {
   // Allow requests from client
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost')
+  res.setHeader('Access-Control-Allow-Origin', 'https://localhost')
   res.setHeader('Access-Control-Allow-Methods', 'POST,GET,PUT,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
   next()
