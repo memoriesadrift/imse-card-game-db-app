@@ -1,6 +1,5 @@
 // TODO: Upgrade to TS
 import express, { json } from 'express';
-import { ObjectId } from 'mongodb';
 import { convertCardGame, convertReview } from './converters.js';
 import { migrateDatabase } from './database/databaseMigrate.js';
 import { IDatabase } from './database/IDatabase.js';

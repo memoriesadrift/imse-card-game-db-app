@@ -1,4 +1,3 @@
-import { func } from 'joi';
 import mysql from 'mysql2/promise';
 import { CardGame, CardType, ReportOne, ReportTwo, Review, User } from '../../types';
 
