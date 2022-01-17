@@ -1,8 +1,8 @@
-import fs, { truncate } from 'fs';
-import { number } from 'joi';
+import fs from 'fs';
 import mysql from 'mysql2/promise';
 import { CardGame, Review, CardType, Verification, ReportOne, ReportTwo, User } from '../../types';
 import { IDatabase } from '../IDatabase'
+import { extractCardGame, extractCardType, extractReportOne, extractReportTwo, extractReview, extractUser } from './rowDataPacketExtractors';
 
 export class RelationalDb implements IDatabase {
   
@@ -23,7 +23,7 @@ export class RelationalDb implements IDatabase {
     }
 
     try {
-      this.pool = await mysql.createPool({
+      this.pool = mysql.createPool({
         host: this.HOST,
         user: this.USER,
         password: this.PASSWORD,
@@ -63,18 +63,25 @@ export class RelationalDb implements IDatabase {
     await con.query("DELETE FROM favorites");
   }
 
+  private async getConnection(): Promise<mysql.Pool> {
+    const con = await this.connect();
+    if (con == undefined) {
+      console.log("Failed to create db connection");
+      throw "Failed to create db connection"
+    }
+
+    return con;
+
+  }
+
 
   /**
    * Uses the files in tha ./data folder to populate the database. This operation may take a while to execute.
    * @returns void
    */
   private insertDataIntoDb = async () => {
-  
-    const con = await this.connect();
-    if (con == undefined) {
-      console.log("Failed to create db connection");
-      return;
-    }
+    
+    const con = await this.getConnection()
   
     // insert users
     console.log("Inserting users");
@@ -166,8 +173,14 @@ export class RelationalDb implements IDatabase {
     const reviewsData = fs.readFileSync('./data/reviews.json', 'utf-8');
     const reviews = JSON.parse(reviewsData);
   
+    // simulate that the first 20% of the card games are much more likely to get a review
+    // should result in more interesting data for the reviews
+    const popularGames = usedCardGameIDs.splice(0, 20);
+
     for (const review of reviews) {
-      const cardGameID = this.pickRandomElement(usedCardGameIDs);
+      const reviewPopulargame = Math.random() <= 0.75;
+      
+      const cardGameID = this.pickRandomElement(reviewPopulargame ? popularGames : usedCardGameIDs);
       const username = this.pickRandomElement(usernames);
   
       await con.query('INSERT INTO Review(CardGameID, LeftBy, ReviewText, Rating) VALUES (?, ?, ?, ?)', [cardGameID, username, review['reviewText'], review['rating']]);
@@ -196,9 +209,11 @@ export class RelationalDb implements IDatabase {
    * @returns true if a connection to a Db is possible, false if not
    */
   isDBReady = async () => {
-    const pool = await this.connect();
-    if (pool == undefined) {
-      console.log("Failed to create connection to db");
+    
+    let pool;
+    try {
+      pool = await this.getConnection();
+    } catch (e: unknown) {
       return false;
     }
     
@@ -220,59 +235,31 @@ export class RelationalDb implements IDatabase {
    * @returns void
    */
   async populateDB() {
-    await this.resetDb();
+    try {
+      await this.resetDb();
+    } catch (e: unknown) {
+      return false;
+    }
 
     try {
       await this.insertDataIntoDb();
     } catch (e: unknown) {
       console.log("Encountered error when inserting data: ");
       console.log(e);
-      await this.resetDb();
+      try {
+        await this.resetDb();
+      } catch (e: unknown) {}
       return false;
     }
   
     return true;
   }
 
-  private extractReview(data: mysql.RowDataPacket): Review {
-    return {
-      id: data.ID,
-      cardGameId: data.CardGameID,
-      text: data.ReviewText, 
-      rating: data.Rating,
-      timestamp: data.CreationTimestamp,
-      leftByUser: data.LeftBy
-    }
-  }
-
-  private extractCardGame(cardGameRowData: mysql.RowDataPacket, reviewRowData: mysql.RowDataPacket[]): CardGame {
-    let cardGameObj:CardGame = {} as CardGame;
-    cardGameObj.id = cardGameRowData.CardGameID;
-    cardGameObj.name = cardGameRowData.CardGameName;
-    cardGameObj.description = cardGameRowData.Description;
-    cardGameObj.cardType = {
-      id: cardGameRowData.CardTypeID,
-      name: cardGameRowData.CardTypeName,
-      wikipediaLink: cardGameRowData.WikipediaLink
-    };
-    
-    cardGameObj.reviews = reviewRowData.map((review):Review => this.extractReview(review));
-
-    if (cardGameRowData.VerifiedCardGameID != null) {
-      cardGameObj.verification = {
-        comment: cardGameRowData.Comment,
-        timestamp: cardGameRowData.CreationTimestamp,
-        verifiedByAdmin: cardGameRowData.VerifiedBy
-      };
-    }
-    
-    return cardGameObj;
-  }
-
   async getCardGames(): Promise<CardGame[] | undefined>  {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
@@ -293,7 +280,7 @@ export class RelationalDb implements IDatabase {
       const reviewsRes = await con.query('SELECT * FROM Review WHERE CardGameID = ?', [cardGame.CardGameID]);
       const reviews = (reviewsRes[0] as mysql.RowDataPacket[]);
 
-      const cardGameObj = this.extractCardGame(cardGame, reviews);
+      const cardGameObj = extractCardGame(cardGame, reviews);
 
       cardGameObjs.push(cardGameObj);
     }
@@ -302,9 +289,10 @@ export class RelationalDb implements IDatabase {
   }
 
   async getCardGame(id: number): Promise<CardGame | undefined>  {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
@@ -328,13 +316,14 @@ export class RelationalDb implements IDatabase {
     const reviewsRes = await con.query('SELECT * FROM Review WHERE CardGameID = ?', [cardGame.CardGameID]);
     const reviews = (reviewsRes[0] as mysql.RowDataPacket[]);
 
-    return this.extractCardGame(cardGame, reviews);;
+    return extractCardGame(cardGame, reviews);;
   }
 
   private async isCardTypeSaved(cardType:CardType):Promise<boolean> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return false;
     }
 
@@ -355,9 +344,10 @@ export class RelationalDb implements IDatabase {
       return false;
     }
 
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return false;
     }
 
@@ -373,9 +363,10 @@ export class RelationalDb implements IDatabase {
   }
   
   async insertReview(cardGameId: number, review: Review): Promise<boolean> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return false;
     }
 
@@ -389,31 +380,25 @@ export class RelationalDb implements IDatabase {
     return true;
   }
 
-  private extractCardType(data: mysql.RowDataPacket):CardType {
-    return {
-      id: data.ID,
-      name: data.Name,
-      wikipediaLink: data.WikipediaLink
-    };
-  }
-
   async getCardTypes(): Promise<CardType[] | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
     const queryRes = await con.query('SELECT * FROM CardType');
     const cardTypesRes = (queryRes[0] as mysql.RowDataPacket[]);
 
-    return cardTypesRes.map(data => this.extractCardType(data));
+    return cardTypesRes.map(data => extractCardType(data));
   }
 
   async updateCardGame(cardGame: CardGame): Promise<boolean> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return false;
     }
 
@@ -435,24 +420,18 @@ export class RelationalDb implements IDatabase {
       AS RecentReview ON RecentReview.CardGameID = CardGame.ID 
     GROUP BY CardType.Name ORDER BY COUNT(Review.ID) DESC;`;
 
-  private extractReportOne(data:mysql.RowDataPacket):ReportOne {
-    const cardTypeName = data.CardTypeName;
-    const reviewCount = data.ReviewCount;
-
-    return {...{cardTypeName, reviewCount}};
-  }
-
   async getReportOne(): Promise<ReportOne[] | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
     const queryRes = await con.query(this.reportOneQuery);
     const reportOneRaw = (queryRes[0] as mysql.RowDataPacket[]);
 
-    return reportOneRaw.map((data) => this.extractReportOne(data));
+    return reportOneRaw.map((data) => extractReportOne(data));
   }
 
   private reportTwoQuery = `SELECT CardGame.Name AS CardGameName, COUNT(Teens.Username) as UserCount FROM
@@ -463,49 +442,54 @@ export class RelationalDb implements IDatabase {
       AND User.Birthday < (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 13 year)))) AS Teens ON Teens.Username = favorites.UserID
     GROUP BY CardGame.Name ORDER BY COUNT(Teens.Username) DESC;`
 
-  private extractReportTwo(data:mysql.RowDataPacket):ReportTwo {
-    const cardGameName = data.CardGameName;
-    const userCount = data.UserCount;
-
-    return {...{cardGameName, userCount}};
-  }
-
+  
   async getReportTwo(): Promise<ReportTwo[] | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
     const queryRes = await con.query(this.reportTwoQuery);
     const reportTwoRaw = (queryRes[0] as mysql.RowDataPacket[]);
 
-    return reportTwoRaw.map((data) => this.extractReportTwo(data));
+    return reportTwoRaw.map((data) => extractReportTwo(data));
   }
 
-  private async extractUser(data: mysql.RowDataPacket):Promise<User | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
-      return undefined;
+  private async addFavoritesToUsers(user: User):Promise<boolean> {
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
+      return false;
     }
     
-    const queryRes = await con.query('SELECT CardGameID FROM favorites WHERE UserID=?', [data.Username]);
-    const favorites = (queryRes[0] as mysql.RowDataPacket[]);
+    try {
+      const queryRes = await con.query('SELECT CardGameID FROM favorites WHERE UserID=?', [user.username]);
+      const favorites = (queryRes[0] as mysql.RowDataPacket[]);
+      user.favorites = favorites.map(favorite => favorite.CardGameID);
+    } catch (e: unknown) {
+      return false;
+    }
+    return true;
+  }
 
-    return {
-      username: data.Username,
-      passwordHash: data.PasswordHash,
-      email: data.Email,
-      birthday: data.Birthday,
-      favorites: favorites.map(favorite => favorite.CardGameID)
-    };
+  private async getFullUser(data: mysql.RowDataPacket): Promise<User | undefined> {
+    const user = extractUser(data);
+    if (!user) {
+      return undefined;
+    }
+
+    await this.addFavoritesToUsers(user);
+    return user;
   }
 
   async getUserNames(): Promise<any[] | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
@@ -518,9 +502,10 @@ export class RelationalDb implements IDatabase {
   }
 
   async getUsers(): Promise<User[] | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
@@ -529,7 +514,7 @@ export class RelationalDb implements IDatabase {
 
     const ret = [];
     for (const user of usersRes) {
-      const typedUser = await this.extractUser(user)
+      const typedUser = await this.getFullUser(user)
       if (!typedUser) {
         return undefined;
       }
@@ -539,15 +524,16 @@ export class RelationalDb implements IDatabase {
   }
 
   async getReviews(): Promise<Review[] | undefined> {
-    const con = await this.connect();
-    if (!con) {
-      console.log("Error retrieving connection!");
+    let con;
+    try {
+      con = await this.getConnection()
+    } catch(e: unknown) {
       return undefined;
     }
 
     const queryRes = await con.query(`SELECT * FROM Review`);
     const reviewRes = (queryRes[0] as mysql.RowDataPacket[]);
 
-    return reviewRes.map(data => this.extractReview(data));
+    return reviewRes.map(data => extractReview(data));
   }
 }
