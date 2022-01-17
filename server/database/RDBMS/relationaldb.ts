@@ -3,6 +3,7 @@ import mysql from 'mysql2/promise';
 import { CardGame, Review, CardType, Verification, ReportOne, ReportTwo, User } from '../../types';
 import { IDatabase } from '../IDatabase'
 import { extractCardGame, extractCardType, extractReportOne, extractReportTwo, extractReview, extractUser } from './rowDataPacketExtractors.js';
+import bcryprt from 'bcryptjs';
 
 export class RelationalDb implements IDatabase {
   
@@ -92,7 +93,7 @@ export class RelationalDb implements IDatabase {
     for (const user of users) {
       usernamesUnusedForAdmin.push(user["username"]);
   
-      await con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [user["username"], user["password"], user["email"], user["birthday"]]); 
+      await con.query('INSERT INTO User VALUES (?, ?, ?, ?)', [user["username"], bcryprt.hashSync(user["password"]), user["email"], user["birthday"]]); 
     }
     const usernames = [...usernamesUnusedForAdmin];
   
