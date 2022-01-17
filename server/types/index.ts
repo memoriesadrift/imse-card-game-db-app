@@ -10,7 +10,7 @@ export type Verification = {
 
 export type Review = {
   id?: number | ObjectId,
-  cardGameId?: number,
+  cardGameId?: number | ObjectId,
   text: string,
   rating: number,
   timestamp?: number,

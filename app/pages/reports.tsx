@@ -3,6 +3,8 @@ import { QueryGuard } from '../src/components/Guards'
 import Navbar from '../src/components/Navbar'
 import CardGameListCard from '../src/components/visual/CardGameListCard'
 import CardTypeListCard from '../src/components/visual/CardTypeListCard'
+import ReportOneCard from '../src/components/visual/ReportOneCard'
+import ReportTwoCard from '../src/components/visual/ReportTwoCard'
 import { useGetMostReviewedCardTypes, useGetPopularCardGamesForTeens } from '../src/dataLayer'
 
 export default function Reports() {
@@ -17,32 +19,57 @@ export default function Reports() {
             <Navbar/>
             <h1 className="uk-heading-medium uk-text-center">Reports</h1>
             <div className='uk-flex uk-flex-center uk-button-group'>
-                <button className="uk-button uk-button-large" onClick={() => setShowReportOne(!showReportOne)}>Show most reviewed card types</button>  
-                <button className="uk-button uk-button-large" onClick={() => setShowReportTwo(!showReportTwo)}>Show most popular card games for teens</button>  
+                <button 
+                    className="uk-button uk-button-large" 
+                    onClick={() => {
+                        setShowReportOne(!showReportOne)
+                        setShowReportTwo(false)
+                    }}
+                >
+                    Show most reviewed card types
+                </button>
+                <button 
+                    className="uk-button uk-button-large"
+                    onClick={() => {
+                        setShowReportTwo(!showReportTwo)
+                        setShowReportOne(false)
+                    }}
+                >
+                    Show most popular card games for teens
+                </button>
             </div>
+            {showReportOne && (
             <QueryGuard {...reportOneQuery}>
-                {(cardTypeList) => (
-                    <ul className='uk-list'>
-                        {cardTypeList.map((cardType, idx) => (
-                        <li key={idx}>
-                            <CardTypeListCard {...{cardType}} reviewNumber={0} />
-                        </li>
-                        ))}
-                    </ul>
+                {(report) => (
+                    <div>
+                        <h3 className="uk-margin-top uk-flex uk-flex-center">Most Reviewed Card Types</h3>
+                        <ul className="uk-list">
+                            {report.map((reportItem, index) => (
+                            <li key={index}>
+                                <ReportOneCard {...{reportItem, index}} />
+                            </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
             </QueryGuard>
+            )}
+            {showReportTwo && (
             <QueryGuard {...reportTwoQuery}>
-                {(gameList) => (
-                    <ul className='uk-list'>
-                        {gameList.map((game, idx) => (
-                        <li key={idx}>
-                            <h4>{`Rank #${idx+1}`}</h4>
-                            <CardGameListCard game={game} />
-                        </li>
-                        ))}
-                    </ul>
+                {(report) => (
+                    <div>
+                        <h3 className="uk-margin-top uk-flex uk-flex-center">Most Popular Card Games for Teen Users</h3>
+                        <ul className="uk-list">
+                            {report.map((reportItem, index) => (
+                            <li key={index}>
+                                <ReportTwoCard {...{reportItem, index}} />
+                            </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
             </QueryGuard>
+            )}
         </div>
     )
 }

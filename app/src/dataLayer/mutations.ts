@@ -1,18 +1,20 @@
 import { useMutation } from "react-query"
 import { baseUri } from "."
-import { CardGame, Review } from "../types"
+import { CardGame, PartialReview } from "../types"
 
 // TODO: maybe do something with responses
 
 export const usePopulateDatabase = () => {
     return useMutation('populateDatabase', async () => {
-        fetch(`${baseUri}/populate`)
+        const res = fetch(`${baseUri}/populate`).then((response) => response.json())
+        return res
     })
 }
 
 export const useMigrateDatabase = () => {
     return useMutation('migrateDatabase', async () => {
-       fetch(`${baseUri}/migrate`)
+        const res = fetch(`${baseUri}/migrate`).then((response) => response.json())
+        return res
     })
 }
 
@@ -29,20 +31,39 @@ export const useAddCardGame = () => {
                 },
                 body: JSON.stringify(game)
             }
-        )
-        return response.json()
+        ).then((res) => res.json())
+        return response
+    })
+}
+
+export const useUpdateCardGame = () => {
+    return useMutation('updateCardGame', async (game: CardGame) => {
+        const response = await fetch(
+            `${baseUri}/games/${game.id}`,
+            {
+                method: 'PUT',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(game)
+            }
+        ).then((res) => res.json())
+        if (!response.success) throw Error('Update unsuccessful!')
+        return response
     })
 }
 
 type LeaveReviewParams = {
-    review: Review,
-    forGameId: number,
+    review: PartialReview,
+    forGameId: string,
 }
 
 export const useLeaveReview = () => {
     return useMutation('leaveReview', async ({review, forGameId}: LeaveReviewParams) => {
         const response = await fetch(
-            `${baseUri}/reviews/${forGameId}`,
+            `${baseUri}/games/review/${forGameId}`,
             {
                 method: 'POST',
                 mode: 'cors',
@@ -52,7 +73,8 @@ export const useLeaveReview = () => {
                 },
                 body: JSON.stringify(review)
             }
-        )
-        return response.json()
+        ).then((res) => res.json())
+        if (!response.success) throw Error('Update unsuccessful!')
+        return response
     })
 }
