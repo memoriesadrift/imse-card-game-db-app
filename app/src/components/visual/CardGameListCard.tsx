@@ -26,7 +26,6 @@ export default function CardGameListCard({game}: CardGameListCardProps) {
             </div>
             <div className="uk-card-body">
                 <p className="uk-text-justify">{game.description}</p>
-                <p>{`${game.reviews.length || 'No'} review${game.reviews.length === 1 ? '' : 's'}`}</p>
             </div>
             <div className="uk-card-footer">
                 <Link href={gameLink(game.id)}><a className="uk-button uk-button-text">Read Reviews</a></Link>

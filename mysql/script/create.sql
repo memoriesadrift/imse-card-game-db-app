@@ -27,18 +27,6 @@ CREATE TABLE CardType(
   PRIMARY KEY (ID)
 );
 
-/*
-DELIMETER //
-CREATE TRIGGER check_wikipediaLink BEFORE INSERT OR UPDATE ON CardType FOR EACH ROW
-BEGIN
-IF (SELECT SUBSTRING(NEW.WikipediaLink, 0, 30)) !=  "https://en.wikipedia.org/wiki/" THEN
-  SIGNAL SQLSTATE '-200000' SET MESSAGE_TEXT = 'The submitted link seems not to be a valid wikipedia link. All links have to start with https://en.wikipedia.org/wiki/';
-END IF;
-END //
-DELIMETER ;
-*/
-
-
 CREATE TABLE CardGame (
   ID INTEGER AUTO_INCREMENT,
   Name NVARCHAR(50), -- assumption; NVARCHAR for unicode

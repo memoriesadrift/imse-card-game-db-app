@@ -14,7 +14,6 @@ export default function Game() {
     return (
         <>
             <Navbar />
-            <h1 className="uk-heading-medium uk-text-center">{`Game ${id}`}</h1>
             <QueryGuard {...cardGameQuery}>
                 {(game) => (<CardGameCard {...{game}}/>)}
             </QueryGuard>
