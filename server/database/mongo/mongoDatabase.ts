@@ -283,9 +283,6 @@ export class MongoDatabase implements IDatabase {
     const today = Date.now();
     const thirteenYearsAgo = new Date(today - 1000 * 60 * 60 * 24 * 365.25 * 13);
     const eighteenYearsAgo = new Date(today - 1000 * 60 * 60 * 24 * 365.25 * 18)
-    
-    console.log(thirteenYearsAgo);
-    console.log(eighteenYearsAgo);
 
     const res = await this.getDatabase().collection('user').aggregate([
       {$match: {birthday: {

@@ -1,4 +1,3 @@
-// TODO: Upgrade to TS
 import express, { json } from 'express';
 import { convertCardGame, convertReview } from './converters.js';
 import { migrateDatabase } from './database/databaseMigrate.js';
