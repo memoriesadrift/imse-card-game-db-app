@@ -88,6 +88,7 @@ app.post('/api/games', async (req, res) => {
   if (!await database.insertCardGame(cardGame)) {
     console.log("Inserting card game into DB failed");
     res.status(422).send({"success":false});
+    return;
   }
 
   console.log("card game successfuly inserted");

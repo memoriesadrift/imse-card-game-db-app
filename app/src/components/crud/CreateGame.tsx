@@ -43,7 +43,12 @@ export default function CreateGame() {
                             <div className="uk-margin">
                                 <label className="uk-form-label" htmlFor="form-horizontal-select">Card Type</label>
                                 <div className="uk-form-controls">
-                                    <select className="uk-select" id="form-horizontal-select" onChange={(event) => setRawCardType(event.target.value)}>
+                                    <select
+                                        className="uk-select"
+                                        id="form-horizontal-select"
+                                        onChange={(event) => setRawCardType(event.target.value)}
+                                        >
+                                        <option hidden disabled selected value=''> </option>
                                         {cardTypes.map((cardType) => (
                                             <option value={cardTypeToJSONString(cardType)} key={cardType.id}>{cardType.name}</option>
                                         ))}

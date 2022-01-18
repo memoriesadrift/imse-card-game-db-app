@@ -5,14 +5,11 @@ WORKDIR /usr/src/app
 COPY package.json ./
 COPY yarn.lock ./
 
-RUN yarn install
-
-# TODO: optimise for production
-# uncomment for production
-# RUN yarn build
-
 # bundle app source
 COPY . .
 
+RUN yarn install
+RUN yarn build
+
 EXPOSE 80
-CMD ["yarn", "dev"]
+CMD ["yarn", "start"]

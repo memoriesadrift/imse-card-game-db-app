@@ -32,6 +32,7 @@ export const useAddCardGame = () => {
                 body: JSON.stringify(game)
             }
         ).then((res) => res.json())
+        if (!response.success) throw Error('Addition unsuccessful!')
         return response
     })
 }

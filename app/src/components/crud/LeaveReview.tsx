@@ -56,9 +56,9 @@ export default function LeaveReview({gameId}: LeaveReviewProps) {
                                 <label className="uk-form-label" htmlFor="form-horizontal-text">User</label>
                                 <select 
                                     className="uk-select"
-                                    defaultValue={rating}
                                     onChange={(event) => setUser(event.target.value)}
                                 >
+                                    <option hidden disabled selected value=''> </option>
                                     {users.map((user) => (
                                         <option key={user} value={user}>{user}</option>
                                     ))}
