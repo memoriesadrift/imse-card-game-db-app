@@ -14,3 +14,5 @@ db.createCollection("review", {
     }
   }
 });
+
+db.createIndex({"cardGameID": 1})

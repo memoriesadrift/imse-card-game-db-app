@@ -1,12 +1,26 @@
+import { verify } from "crypto";
 import { ObjectId } from "mongodb";
 import { CardGame, Review } from "../../types";
 
 export function extractCardGame(cardGame: CardGame, id?: ObjectId | undefined) {
+  if (!cardGame.verification) {
+    return {
+      _id: id,
+      name: cardGame.name,
+      cardType: {
+        name: cardGame.cardType.name,
+        wikipediaLink: cardGame.cardType.wikipediaLink
+      },
+      description: cardGame.description,
+    }
+  }
+
   const verification = !cardGame.verification ? undefined : {
     comment: cardGame.verification.comment,
     timestamp: cardGame.verification.timestamp,
     verifiedByAdmin: cardGame.verification.verifiedByAdmin
   };
+
   return {
     _id: id,
     name: cardGame.name,
