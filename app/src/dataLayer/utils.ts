@@ -28,11 +28,11 @@ export const parseCardGame = (json: any) =>  {
     const reviews: {reviews: Array<Review>} = {
         reviews: json.reviews.map((rawReview: any): Review => {
             return {
-                id: rawReview.id,
-                text: rawReview.text,
+                id: rawReview.id || rawReview._id, 
+                text: rawReview.text || rawReview.reviewText,
                 rating: parseInt(rawReview.rating),
-                timestamp: Date.parse(rawReview.timestamp),
-                leftByUser: rawReview.leftByUser,
+                timestamp: rawReview.timestamp ? Date.parse(rawReview.timestamp) : rawReview.creationTimestamp,
+                leftByUser: rawReview.leftByUser || rawReview.leftBy,
             }
         }),
     }
