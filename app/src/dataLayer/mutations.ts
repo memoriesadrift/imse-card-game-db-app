@@ -6,14 +6,16 @@ import { CardGame, PartialReview } from "../types"
 
 export const usePopulateDatabase = () => {
     return useMutation('populateDatabase', async () => {
-        const res = fetch(`${baseUri}/populate`).then((response) => response.json())
+        const res = await fetch(`${baseUri}/populate`).then((response) => response.json())
+        if (!res.success) throw Error('Population unsuccessful!')
         return res
     })
 }
 
 export const useMigrateDatabase = () => {
     return useMutation('migrateDatabase', async () => {
-        const res = fetch(`${baseUri}/migrate`).then((response) => response.json())
+        const res = await fetch(`${baseUri}/migrate`).then((response) => response.json())
+        if (!res.success) throw Error('Migration unsuccessful!')
         return res
     })
 }
