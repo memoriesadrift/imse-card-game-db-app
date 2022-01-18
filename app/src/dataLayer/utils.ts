@@ -11,6 +11,7 @@ export const parseCardType = (json: any) => {
 }
 
 export const parseCardGame = (json: any) =>  {
+    console.log(json)
     const baseObj = {
         id: json.id,
         name: json.name,
@@ -31,7 +32,7 @@ export const parseCardGame = (json: any) =>  {
                 id: rawReview.id,
                 text: rawReview.text,
                 rating: parseInt(rawReview.rating),
-                timestamp: parseInt(rawReview.timestamp),
+                timestamp: Date.parse(rawReview.timestamp),
                 leftByUser: rawReview.leftByUser,
             }
         }),
@@ -40,7 +41,7 @@ export const parseCardGame = (json: any) =>  {
     const verification: {verification?: Verification} = json.verification ? {
         verification: {
             comment: json.verification.comment,
-            timestamp: parseInt(json.verification.timestamp),
+            timestamp: Date.parse(json.verification.timestamp),
             verifiedByAdmin: json.verification.verifiedByAdmin,
         },
     } : {}

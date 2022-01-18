@@ -14,7 +14,7 @@ let database:IDatabase = new RelationalDb();
 
 
 // Set headers for each request
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
   // Allow requests from client
   res.setHeader('Access-Control-Allow-Origin', 'https://localhost')
   res.setHeader('Access-Control-Allow-Methods', 'POST,GET,PUT,OPTIONS')
@@ -67,7 +67,6 @@ app.get('/api/games/:id', async (req, res) => {
   const id = req.params.id;
   
   const cardGame = await database.getCardGame(id);
-  console.log(cardGame);
   if (!cardGame) {
     res.status(500).send({});
   } else {
