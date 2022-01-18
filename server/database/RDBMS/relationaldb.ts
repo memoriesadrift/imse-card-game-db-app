@@ -416,7 +416,7 @@ export class RelationalDb implements IDatabase {
   private reportOneQuery = `SELECT CardType.Name AS CardTypeName, COUNT(RecentReview.ID) as ReviewCount FROM 
     CardGame
     LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
-    CROSS JOIN (SELECT * FROM Review
+    LEFT JOIN (SELECT * FROM Review
       WHERE Review.CreationTimestamp > (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 day))))
       AS RecentReview ON RecentReview.CardGameID = CardGame.ID 
     GROUP BY CardType.Name ORDER BY COUNT(Review.ID) DESC;`;
