@@ -1,4 +1,3 @@
-// TODO: Upgrade to TS
 import express, { json } from 'express';
 import { convertCardGame, convertReview } from './converters.js';
 import { migrateDatabase } from './database/databaseMigrate.js';
@@ -15,7 +14,7 @@ let database:IDatabase = new RelationalDb();
 
 
 // Set headers for each request
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
   // Allow requests from client
   res.setHeader('Access-Control-Allow-Origin', 'https://localhost')
   res.setHeader('Access-Control-Allow-Methods', 'POST,GET,PUT,OPTIONS')
@@ -68,7 +67,6 @@ app.get('/api/games/:id', async (req, res) => {
   const id = req.params.id;
   
   const cardGame = await database.getCardGame(id);
-  console.log(cardGame);
   if (!cardGame) {
     res.status(500).send({});
   } else {
@@ -90,6 +88,7 @@ app.post('/api/games', async (req, res) => {
   if (!await database.insertCardGame(cardGame)) {
     console.log("Inserting card game into DB failed");
     res.status(422).send({"success":false});
+    return;
   }
 
   console.log("card game successfuly inserted");

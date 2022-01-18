@@ -37,7 +37,6 @@ export type CardGame = {
     verification?: Verification,
 }
 
-// TODO: Expand using dependent query to include more data
 export type ReportOne = {
   cardTypeName: string,
   reviewCount: number

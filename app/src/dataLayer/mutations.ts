@@ -2,8 +2,6 @@ import { useMutation } from "react-query"
 import { baseUri } from "."
 import { CardGame, PartialReview } from "../types"
 
-// TODO: maybe do something with responses
-
 export const usePopulateDatabase = () => {
     return useMutation('populateDatabase', async () => {
         const res = await fetch(`${baseUri}/populate`).then((response) => response.json())
@@ -34,6 +32,7 @@ export const useAddCardGame = () => {
                 body: JSON.stringify(game)
             }
         ).then((res) => res.json())
+        if (!response.success) throw Error('Addition unsuccessful!')
         return response
     })
 }

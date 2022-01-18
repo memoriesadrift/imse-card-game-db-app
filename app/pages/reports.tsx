@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { QueryGuard } from '../src/components/Guards'
 import Navbar from '../src/components/Navbar'
-import CardGameListCard from '../src/components/visual/CardGameListCard'
-import CardTypeListCard from '../src/components/visual/CardTypeListCard'
 import ReportOneCard from '../src/components/visual/ReportOneCard'
 import ReportTwoCard from '../src/components/visual/ReportTwoCard'
 import { useGetMostReviewedCardTypes, useGetPopularCardGamesForTeens } from '../src/dataLayer'

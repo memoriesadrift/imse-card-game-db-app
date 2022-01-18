@@ -14,11 +14,8 @@ export default function EditGame() {
     return (
         <>
             <Navbar />
-            <h1 className="uk-heading-medium uk-text-center">{`Game ${id}`}</h1>
             <QueryGuard {...cardGameQuery}>
-            {(cardGame) => (
-                <UpdateGame {...{cardGame}} />
-            )}
+            {(cardGame) => (<UpdateGame {...{cardGame}} />)}
             </QueryGuard>
         </>
     )

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import mysql from 'mysql2/promise';
-import { CardGame, Review, CardType, Verification, ReportOne, ReportTwo, User } from '../../types';
+import { CardGame, Review, CardType, ReportOne, ReportTwo, User } from '../../types';
 import { IDatabase } from '../IDatabase'
 import { extractCardGame, extractCardType, extractReportOne, extractReportTwo, extractReview, extractUser } from './rowDataPacketExtractors.js';
 import bcryprt from 'bcryptjs';
@@ -414,11 +414,11 @@ export class RelationalDb implements IDatabase {
   }
 
   private reportOneQuery = `SELECT CardType.Name AS CardTypeName, COUNT(RecentReview.ID) as ReviewCount FROM 
-    CardGame
-    LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
-    CROSS JOIN (SELECT * FROM Review
+   (SELECT * FROM Review
       WHERE Review.CreationTimestamp > (SELECT TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 day))))
-      AS RecentReview ON RecentReview.CardGameID = CardGame.ID 
+      AS RecentReview
+    LEFT JOIN CardGame ON RecentReview.CardGameID = CardGame.ID 
+    LEFT JOIN CardType ON CardGame.CardTypeID = CardType.ID
     GROUP BY CardType.Name ORDER BY COUNT(Review.ID) DESC;`;
 
   async getReportOne(): Promise<ReportOne[] | undefined> {

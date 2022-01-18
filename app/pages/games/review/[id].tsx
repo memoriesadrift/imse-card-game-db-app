@@ -10,7 +10,7 @@ export default function ReviewGame() {
     return (
         <div>
             <Navbar />
-            <h1 className="uk-heading-medium uk-text-center">{`New Review for Game ${id}`}</h1>
+            <h1 className="uk-heading-medium uk-text-center">{`New Review`}</h1>
             <LeaveReview gameId={id as string} />
         </div>
     )

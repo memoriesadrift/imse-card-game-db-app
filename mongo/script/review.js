@@ -15,4 +15,4 @@ db.createCollection("review", {
   }
 });
 
-db.createIndex({"cardGameID": 1})
+db.review.createIndex({"cardGameID": 1})

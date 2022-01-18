@@ -1,4 +1,4 @@
-import { CardGame, Review, CardType, ReportOne, ReportTwo, User } from "../types";
+import { CardGame, Review, CardType, ReportOne, ReportTwo } from "../types";
 
 export interface IDatabase {
 
