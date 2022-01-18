@@ -11,7 +11,6 @@ export const parseCardType = (json: any) => {
 }
 
 export const parseCardGame = (json: any) =>  {
-    console.log(json)
     const baseObj = {
         id: json.id,
         name: json.name,
